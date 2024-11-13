@@ -160,6 +160,7 @@
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="HeightMapHandler.cpp" />
     <ClCompile Include="ImGuiManager.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="InputSystem.cpp" />
@@ -195,6 +196,7 @@
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityManager.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="HeightMapHandler.h" />
     <ClInclude Include="ImGuiManager.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="InputSystem.h" />

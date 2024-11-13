@@ -18,6 +18,7 @@
 #include "InputSystem.h"
 #include "CameraSystem.h"
 #include "RenderHandler.h"
+#include "HeightMapHandler.h"
 
 // ECS
 #include "ComponentManager.h"
@@ -38,15 +39,11 @@ public:
     void init();                       // Initializes systems
     void run();                        // Main game loop
     void shutdown();                   // Cleans up resources
-
     void toggleImguiDebug();           // Toggles the debug UI
-
-    std::vector<glm::vec3> loadPointsFromFile(const std::string& filePath, int maxPoints); // Reading and parsing points from external document
 
     std::shared_ptr<Camera> camera;
     std::shared_ptr<Window> window;
 
-    std::vector<glm::vec3> heightMapPoints;
 private:
     void update();                     // Updates game logic
     void render();                     // Renders the scene
@@ -60,10 +57,9 @@ private:
     std::shared_ptr<InputManager> inputManager;
     std::shared_ptr<ImGuiManager> imguiManager;
     std::shared_ptr<Transform> transform;
+    std::shared_ptr<HeightMapHandler> heightMapManager;
 
     std::shared_ptr<Model> model;
-    //std::shared_ptr<ColliderMeshFactory> ColliderMeshFactory;
-
     std::shared_ptr<Shader> shader;
 
     // ECS
@@ -80,20 +76,4 @@ private:
     std::shared_ptr<InputSystem> inputSystem;
 
     float lastFrameTime = 0.0f;
-
-
-    // helper functions to center the surface
-    glm::vec3 calculateCentroid(const std::vector<glm::vec3>& points) {
-        glm::vec3 sum(0.0f);
-        for (const auto& point : points) {
-            sum += point;
-        }
-        return sum / static_cast<float>(points.size());
-    }
-    void centerPointsAroundOrigin(std::vector<glm::vec3>& points) {
-        glm::vec3 centroid = calculateCentroid(points);
-        for (auto& point : points) {
-            point -= centroid;
-        }
-    }
 };

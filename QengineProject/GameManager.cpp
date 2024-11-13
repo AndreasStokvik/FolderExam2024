@@ -16,17 +16,15 @@ void GameManager::init() {
 
     // Entity creation  ----------------------------------------------------------------------------------------------------------------------------------------
     int entityId = entityManager.createEntity();
-    renderManager.addComponent(entityId, RenderComponent(std::make_shared<Model>("models/cube2.obj")));
+    //renderManager.addComponent(entityId, RenderComponent(std::make_shared<Model>("models/cube2.obj")));
     transformManager.addComponent(entityId, TransformComponent(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f)));
     velocityManager.addComponent(entityId, VelocityComponent(glm::vec3(0.0f, 0.0f, 0.0f)));
     inputManagerComponent.addComponent(entityId, InputComponent());
     //colliderManager.addComponent(entityId, ColliderComponent(ColliderType::SPHERE, glm::vec3(0.0f), glm::vec3(20.0f)));
     
     int surfaceEntity = entityManager.createEntity();
-
-    std::vector<glm::vec3> heightMapPoints = loadPointsFromFile("external_files/HeightMap.txt", -1);
-    centerPointsAroundOrigin(heightMapPoints);
-    pointCloudManager.addComponent(surfaceEntity, PointCloudComponent(heightMapPoints));
+    heightMapManager = std::make_shared<HeightMapHandler>("external_files/HeightMap.txt", 100000);
+    pointCloudManager.addComponent(surfaceEntity, PointCloudComponent(heightMapManager->getHeightMapVector()));
     transformManager.addComponent(surfaceEntity, TransformComponent(glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(1.0f)));
     //  --------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -129,38 +127,4 @@ void GameManager::processInput() {
 
 void GameManager::toggleImguiDebug() {
     showImguiDebug = !showImguiDebug;
-}
-
-
-std::vector<glm::vec3> GameManager::loadPointsFromFile(const std::string& filePath, int maxPoints = -1) {
-    std::ifstream file(filePath);
-    std::vector<glm::vec3> points;
-    file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-    std::string line;
-    int pointCount = 0;
-
-    while (std::getline(file, line) && (maxPoints < 0 || pointCount < maxPoints)) {
-        std::stringstream ss(line);
-        std::string xStr, yStr, zStr;
-
-        // Read the comma-separated values
-        if (std::getline(ss, xStr, ',') &&
-            std::getline(ss, yStr, ',') &&
-            std::getline(ss, zStr, ',')) {
-
-            float x = std::stof(xStr) - 607200;
-            float y = std::stof(yStr) - 6750618;
-            float z = std::stof(zStr) - 270;
-
-            points.emplace_back(x, z, y); // Swap y/z for convenience
-            pointCount++;
-        }
-        else {
-            std::cerr << "Error parsing line: " << line << std::endl;
-        }
-    }
-    std::cout << "number of points: " << pointCount << std::endl;
-
-    return points;
 }
