@@ -60,5 +60,5 @@ private:
     ComponentManager<VelocityComponent>& velocityComponents;
     ComponentManager<TransformComponent>& transformComponents;
     std::shared_ptr<InputManager> inputManagerInstance;
-    float desiredSpeed = 10.0f;                             // Movement speed
+    float desiredSpeed = 50.0f;                             // Movement speed
 };

@@ -11,6 +11,7 @@ uniform vec3 lightPos;              // Light position uniform
 uniform vec3 lightColor;            // Light color uniform
 uniform vec3 viewPos;               // Camera position uniform
 uniform bool hasTexture;            // Texture presence uniform
+uniform vec3 pointColor;            // Uniform color for point rendering
 
 void main() {
     // Ambient lighting
@@ -38,6 +39,6 @@ void main() {
         FragColor = texture(textureSampler, TexCoords) * vec4(lighting, 1.0);
     } else {
         // Render using only the lighting calculation if no texture is present
-        FragColor = vec4(lighting, 1.0);
+        FragColor = vec4(pointColor * lighting, 1.0);
     }
 }

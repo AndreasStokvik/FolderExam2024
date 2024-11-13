@@ -20,20 +20,14 @@ void GameManager::init() {
     transformManager.addComponent(entityId, TransformComponent(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f)));
     velocityManager.addComponent(entityId, VelocityComponent(glm::vec3(0.0f, 0.0f, 0.0f)));
     inputManagerComponent.addComponent(entityId, InputComponent());
-    colliderManager.addComponent(entityId, ColliderComponent(ColliderType::SPHERE, glm::vec3(0.0f), glm::vec3(20.0f)));
+    //colliderManager.addComponent(entityId, ColliderComponent(ColliderType::SPHERE, glm::vec3(0.0f), glm::vec3(20.0f)));
+    
+    int surfaceEntity = entityManager.createEntity();
 
-    int entity2 = entityManager.createEntity();
-    renderManager.addComponent(entity2, RenderComponent(std::make_shared<Model>("models/test1.obj")));
-    transformManager.addComponent(entity2, TransformComponent(glm::vec3(10.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.5f), glm::vec3(0.5f)));
-    colliderManager.addComponent(entity2, ColliderComponent(ColliderType::BOX, glm::vec3(0.0f), glm::vec3(10.0f)));
-
-    int entity3 = entityManager.createEntity();
-    renderManager.addComponent(entity3, RenderComponent(std::make_shared<Model>("models/environment.obj")));
-    transformManager.addComponent(entity3, TransformComponent(glm::vec3(2.0f, -5.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.5f), glm::vec3(0.12f)));
-
-    int entityId4 = entityManager.createEntity();
-    renderManager.addComponent(entityId4, RenderComponent(std::make_shared<Model>("models/cube2.obj")));
-    transformManager.addComponent(entityId4, TransformComponent(glm::vec3(-20.0f, 10.0f, -20.0f), glm::vec3(45.0f, 0.0f, 45.0f), glm::vec3(10.0f)));
+    std::vector<glm::vec3> heightMapPoints = loadPointsFromFile("external_files/HeightMap.txt", -1);
+    centerPointsAroundOrigin(heightMapPoints);
+    pointCloudManager.addComponent(surfaceEntity, PointCloudComponent(heightMapPoints));
+    transformManager.addComponent(surfaceEntity, TransformComponent(glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(1.0f)));
     //  --------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -66,8 +60,6 @@ void GameManager::update() {
     inputSystem->update(window, deltaTime);
     physicsSystem->update(deltaTime);
 
-    transform->updateViewMatrix(camera);
-    transform->setViewUniform(shader);
     for (int entity : entityManager.getEntities()) {
         if (transformManager.hasComponent(entity)) {
             TransformComponent& transformComp = transformManager.getComponent(entity);
@@ -78,6 +70,8 @@ void GameManager::update() {
             camera->followObject(transformComp.position, transformComp.rotation.y);
         }
     }
+    transform->updateViewMatrix(camera);
+    transform->setViewUniform(shader);
 }
 
 void GameManager::render() {
@@ -95,6 +89,17 @@ void GameManager::render() {
                 renderHandler->draw(*renderComp.model, shader, false);
             }
 
+            if (pointCloudManager.hasComponent(entity)) {
+                PointCloudComponent& pointCloudComp = pointCloudManager.getComponent(entity);
+                glm::mat4 modelMatrix = glm::mat4(1.0f);
+                modelMatrix = glm::translate(modelMatrix, transformComp.position);
+                modelMatrix = glm::scale(modelMatrix, transformComp.scale);
+
+                shader->setUniform("model", modelMatrix);
+                shader->setUniform("pointColor", glm::vec3(0.0f, 1.0f, 0.0f));
+                renderHandler->drawPointCloud(pointCloudComp.points, shader);
+            }
+
             if (colliderManager.hasComponent(entity) && showWireframe) {
                 ColliderComponent& colliderComp = colliderManager.getComponent(entity);
                 Model colliderMesh = ColliderMeshFactory::createColliderMesh(colliderComp);
@@ -102,6 +107,8 @@ void GameManager::render() {
             }
         }
     }
+
+    //renderHandler->drawPointCloud(heightMapPoints, shader);
 
     if (showImguiDebug) {
         //imguiManager->DemoWindow("demo window");
@@ -122,4 +129,38 @@ void GameManager::processInput() {
 
 void GameManager::toggleImguiDebug() {
     showImguiDebug = !showImguiDebug;
+}
+
+
+std::vector<glm::vec3> GameManager::loadPointsFromFile(const std::string& filePath, int maxPoints = -1) {
+    std::ifstream file(filePath);
+    std::vector<glm::vec3> points;
+    file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    std::string line;
+    int pointCount = 0;
+
+    while (std::getline(file, line) && (maxPoints < 0 || pointCount < maxPoints)) {
+        std::stringstream ss(line);
+        std::string xStr, yStr, zStr;
+
+        // Read the comma-separated values
+        if (std::getline(ss, xStr, ',') &&
+            std::getline(ss, yStr, ',') &&
+            std::getline(ss, zStr, ',')) {
+
+            float x = std::stof(xStr) - 607200;
+            float y = std::stof(yStr) - 6750618;
+            float z = std::stof(zStr) - 270;
+
+            points.emplace_back(x, z, y); // Swap y/z for convenience
+            pointCount++;
+        }
+        else {
+            std::cerr << "Error parsing line: " << line << std::endl;
+        }
+    }
+    std::cout << "number of points: " << pointCount << std::endl;
+
+    return points;
 }

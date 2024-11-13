@@ -32,6 +32,8 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, s
     glDeleteShader(fragmentShader);
     use();
     setLightingUniforms(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(2.0f, 2.0f, 2.0f), camera->getPosition());
+
+    glEnable(GL_PROGRAM_POINT_SIZE);
 }
 
 Shader::~Shader(){glDeleteProgram(programID);}

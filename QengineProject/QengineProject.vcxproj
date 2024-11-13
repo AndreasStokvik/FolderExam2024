@@ -24,6 +24,7 @@
     <ProjectGuid>{774d6ef3-b762-4648-9366-6900de726735}</ProjectGuid>
     <RootNamespace>QengineProject</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>FolderExam2024</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -140,6 +141,7 @@
     <ClCompile Include="..\components\CameraComponent.cpp" />
     <ClCompile Include="..\components\ColliderComponent.cpp" />
     <ClCompile Include="..\components\InputComponent.cpp" />
+    <ClCompile Include="..\components\PointCloudComponent.cpp" />
     <ClCompile Include="..\components\RenderComponent.cpp" />
     <ClCompile Include="..\components\TransformComponent.cpp" />
     <ClCompile Include="..\components\VelocityComponent.cpp" />
@@ -173,6 +175,7 @@
     <ClInclude Include="..\components\CameraComponent.h" />
     <ClInclude Include="..\components\ColliderComponent.h" />
     <ClInclude Include="..\components\InputComponent.h" />
+    <ClInclude Include="..\components\PointCloudComponent.h" />
     <ClInclude Include="..\components\RenderComponent.h" />
     <ClInclude Include="..\components\TransformComponent.h" />
     <ClInclude Include="..\components\VelocityComponent.h" />

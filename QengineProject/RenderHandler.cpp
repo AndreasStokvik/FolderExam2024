@@ -1,4 +1,3 @@
-// RenderHandler.cpp
 #include "RenderHandler.h"
 
 void RenderHandler::draw(const Model& model, const std::shared_ptr<Shader>& shader, bool wireframe) {
@@ -9,7 +8,6 @@ void RenderHandler::draw(const Model& model, const std::shared_ptr<Shader>& shad
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
     
-    // Set textures
     bool hasTextures = !model.getTextures().empty();
     shader->setUniform("hasTexture", hasTextures);
 
@@ -23,12 +21,34 @@ void RenderHandler::draw(const Model& model, const std::shared_ptr<Shader>& shad
 
     setupMesh(model);
 
-    // Draw elements
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, model.getIndices().size(), GL_UNSIGNED_INT, 0);
 
     // Cleanup
     glBindVertexArray(0);
+}
+
+void RenderHandler::drawPointCloud(const std::vector<glm::vec3>& points, const std::shared_ptr<Shader>& shader) {
+    GLuint pointVAO, pointVBO;
+    glGenVertexArrays(1, &pointVAO);
+    glGenBuffers(1, &pointVBO);
+
+    glBindVertexArray(pointVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, pointVBO);
+    glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec3), points.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    shader->use();
+    glBindVertexArray(pointVAO);
+    shader->setUniform("pointSize", 1.0f);
+    shader->setUniform("hasTexture", false);
+    glDrawArrays(GL_POINTS, 0, points.size());
+
+    glBindVertexArray(0);
+    glDeleteBuffers(1, &pointVBO);
+    glDeleteVertexArrays(1, &pointVAO);
 }
 
 void RenderHandler::setupMesh(const Model& model) {

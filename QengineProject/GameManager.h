@@ -1,5 +1,9 @@
 #include <memory>
 #include <unordered_map>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <glm/vec3.hpp>
 
 #include "Window.h"
 #include "Shader.h"
@@ -24,21 +28,25 @@
 #include "../../components/VelocityComponent.h"
 #include "../../components/InputComponent.h"
 #include "../../components/ColliderComponent.h"
+#include "../../components/PointCloudComponent.h"
 
 class InputManager;
 
 class GameManager {
 public:
-    GameManager();                     // Constructor to initialize components
-    void init();                       // Initializes all systems
+    GameManager();                     // Constructor
+    void init();                       // Initializes systems
     void run();                        // Main game loop
     void shutdown();                   // Cleans up resources
 
     void toggleImguiDebug();           // Toggles the debug UI
 
+    std::vector<glm::vec3> loadPointsFromFile(const std::string& filePath, int maxPoints); // Reading and parsing points from external document
+
     std::shared_ptr<Camera> camera;
     std::shared_ptr<Window> window;
 
+    std::vector<glm::vec3> heightMapPoints;
 private:
     void update();                     // Updates game logic
     void render();                     // Renders the scene
@@ -66,9 +74,26 @@ private:
     ComponentManager<VelocityComponent> velocityManager;
     ComponentManager<InputComponent> inputManagerComponent;
     ComponentManager<ColliderComponent> colliderManager;
+    ComponentManager<PointCloudComponent> pointCloudManager;
 
     std::shared_ptr<PhysicsSystem> physicsSystem;
     std::shared_ptr<InputSystem> inputSystem;
 
     float lastFrameTime = 0.0f;
+
+
+    // helper functions to center the surface
+    glm::vec3 calculateCentroid(const std::vector<glm::vec3>& points) {
+        glm::vec3 sum(0.0f);
+        for (const auto& point : points) {
+            sum += point;
+        }
+        return sum / static_cast<float>(points.size());
+    }
+    void centerPointsAroundOrigin(std::vector<glm::vec3>& points) {
+        glm::vec3 centroid = calculateCentroid(points);
+        for (auto& point : points) {
+            point -= centroid;
+        }
+    }
 };
