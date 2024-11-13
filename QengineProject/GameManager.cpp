@@ -15,16 +15,19 @@ void GameManager::init() {
 
 
     // Entity creation  ----------------------------------------------------------------------------------------------------------------------------------------
-    int entityId = entityManager.createEntity();
-    //renderManager.addComponent(entityId, RenderComponent(std::make_shared<Model>("models/cube2.obj")));
-    transformManager.addComponent(entityId, TransformComponent(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f)));
-    velocityManager.addComponent(entityId, VelocityComponent(glm::vec3(0.0f, 0.0f, 0.0f)));
-    inputManagerComponent.addComponent(entityId, InputComponent());
-    //colliderManager.addComponent(entityId, ColliderComponent(ColliderType::SPHERE, glm::vec3(0.0f), glm::vec3(20.0f)));
+    int player = entityManager.createEntity();
+    //renderManager.addComponent(player, RenderComponent(std::make_shared<Model>("models/cube2.obj")));
+    //colliderManager.addComponent(player, ColliderComponent(ColliderType::SPHERE, glm::vec3(0.0f), glm::vec3(20.0f)));
+    transformManager.addComponent(player, TransformComponent(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f)));
+    velocityManager.addComponent(player, VelocityComponent(glm::vec3(0.0f, 0.0f, 0.0f)));
+    inputManagerComponent.addComponent(player, InputComponent());
     
     int surfaceEntity = entityManager.createEntity();
-    heightMapManager = std::make_shared<HeightMapHandler>("external_files/HeightMap.txt", 100000);
-    pointCloudManager.addComponent(surfaceEntity, PointCloudComponent(heightMapManager->getHeightMapVector()));
+    heightMapManager = std::make_shared<HeightMapHandler>("external_files/HeightMap.txt", -1);
+    //pointCloudManager.addComponent(surfaceEntity, PointCloudComponent(heightMapManager->getHeightMapVector()));
+    triangleSurfaceManager.addComponent(surfaceEntity, TriangleSurfaceMeshComponent(
+        heightMapManager->getHeightMapVector(), heightMapManager->getIndices()
+    ));
     transformManager.addComponent(surfaceEntity, TransformComponent(glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(1.0f)));
     //  --------------------------------------------------------------------------------------------------------------------------------------------------------
 

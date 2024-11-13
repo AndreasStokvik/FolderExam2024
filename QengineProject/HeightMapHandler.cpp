@@ -2,7 +2,7 @@
 
 HeightMapHandler::HeightMapHandler(const std::string& filePath, int maxPoints) {
     heightMapPoints = loadPointsFromFile(filePath, maxPoints);
-    centerPointsAroundOrigin(heightMapPoints);
+    //heightMapPoints = centerPointsAroundOrigin(heightMapPoints);
 }
 
 std::vector<glm::vec3> HeightMapHandler::loadPointsFromFile(const std::string& filePath, int maxPoints = -1)
@@ -18,7 +18,6 @@ std::vector<glm::vec3> HeightMapHandler::loadPointsFromFile(const std::string& f
         std::stringstream ss(line);
         std::string xStr, yStr, zStr;
 
-        // Read the comma-separated values
         if (std::getline(ss, xStr, ',') &&
             std::getline(ss, yStr, ',') &&
             std::getline(ss, zStr, ',')) {
@@ -42,4 +41,9 @@ std::vector<glm::vec3> HeightMapHandler::loadPointsFromFile(const std::string& f
 std::vector<glm::vec3> HeightMapHandler::getHeightMapVector()
 {
     return heightMapPoints;
+}
+
+std::vector<unsigned int> HeightMapHandler::getIndices()
+{
+    return indices;
 }

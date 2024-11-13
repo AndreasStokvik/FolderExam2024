@@ -144,6 +144,7 @@
     <ClCompile Include="..\components\PointCloudComponent.cpp" />
     <ClCompile Include="..\components\RenderComponent.cpp" />
     <ClCompile Include="..\components\TransformComponent.cpp" />
+    <ClCompile Include="..\components\TriangleSurfaceMeshComponent.cpp" />
     <ClCompile Include="..\components\VelocityComponent.cpp" />
     <ClCompile Include="..\libs\glad\src\glad.c" />
     <ClCompile Include="..\libs\imgui\imgui.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="..\components\PointCloudComponent.h" />
     <ClInclude Include="..\components\RenderComponent.h" />
     <ClInclude Include="..\components\TransformComponent.h" />
+    <ClInclude Include="..\components\TriangleSurfaceMeshComponent.h" />
     <ClInclude Include="..\components\VelocityComponent.h" />
     <ClInclude Include="..\libs\imgui\imconfig.h" />
     <ClInclude Include="..\libs\imgui\imgui.h" />

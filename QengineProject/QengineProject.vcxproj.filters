@@ -114,6 +114,9 @@
     <ClCompile Include="HeightMapHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\components\TriangleSurfaceMeshComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -216,6 +219,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HeightMapHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\components\TriangleSurfaceMeshComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

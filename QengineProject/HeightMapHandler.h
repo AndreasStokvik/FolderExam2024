@@ -14,9 +14,12 @@ public:
 
     std::vector<glm::vec3> getHeightMapVector();
 
+    std::vector<unsigned int> getIndices();
+
 private:
 
     std::vector<glm::vec3> heightMapPoints;
+    std::vector<unsigned int> indices;
 
     glm::vec3 calculateCentroid(const std::vector<glm::vec3>& points) {
         glm::vec3 sum(0.0f);
@@ -25,11 +28,12 @@ private:
         }
         return sum / static_cast<float>(points.size());
     }
-    void centerPointsAroundOrigin(std::vector<glm::vec3>& points) {
+    std::vector<glm::vec3> centerPointsAroundOrigin(std::vector<glm::vec3>& points) {
         glm::vec3 centroid = calculateCentroid(points);
         for (auto& point : points) {
             point -= centroid;
         }
+        return points;
     }
 };
 

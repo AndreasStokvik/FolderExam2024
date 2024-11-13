@@ -30,6 +30,7 @@
 #include "../../components/InputComponent.h"
 #include "../../components/ColliderComponent.h"
 #include "../../components/PointCloudComponent.h"
+#include "../../components/TriangleSurfaceMeshComponent.h"
 
 class InputManager;
 
@@ -71,6 +72,7 @@ private:
     ComponentManager<InputComponent> inputManagerComponent;
     ComponentManager<ColliderComponent> colliderManager;
     ComponentManager<PointCloudComponent> pointCloudManager;
+    ComponentManager<TriangleSurfaceMeshComponent> triangleSurfaceManager;
 
     std::shared_ptr<PhysicsSystem> physicsSystem;
     std::shared_ptr<InputSystem> inputSystem;
