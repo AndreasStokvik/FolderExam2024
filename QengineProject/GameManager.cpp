@@ -23,11 +23,10 @@ void GameManager::init() {
     inputManagerComponent.addComponent(player, InputComponent());
     
     int surfaceEntity = entityManager.createEntity();
-    heightMapManager = std::make_shared<HeightMapHandler>("external_files/HeightMap.txt", -1);
+    heightMapManager = std::make_shared<HeightMapHandler>("external_files/HeightMap.txt", 10000);
     //pointCloudManager.addComponent(surfaceEntity, PointCloudComponent(heightMapManager->getHeightMapVector()));
-    triangleSurfaceManager.addComponent(surfaceEntity, TriangleSurfaceMeshComponent(
-        heightMapManager->getHeightMapVector(), heightMapManager->getIndices()
-    ));
+    triangleSurfaceManager.addComponent(surfaceEntity, TriangleSurfaceMeshComponent
+        (heightMapManager->getHeightMapVector(), heightMapManager->getNormals(), heightMapManager->getIndices()));
     transformManager.addComponent(surfaceEntity, TransformComponent(glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(1.0f)));
     //  --------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -92,13 +91,14 @@ void GameManager::render() {
 
             if (pointCloudManager.hasComponent(entity)) {
                 PointCloudComponent& pointCloudComp = pointCloudManager.getComponent(entity);
-                glm::mat4 modelMatrix = glm::mat4(1.0f);
-                modelMatrix = glm::translate(modelMatrix, transformComp.position);
-                modelMatrix = glm::scale(modelMatrix, transformComp.scale);
-
-                shader->setUniform("model", modelMatrix);
-                shader->setUniform("pointColor", glm::vec3(0.0f, 1.0f, 0.0f));
+                shader->setUniform("pointColor", glm::vec3(1.0f, 0.5f, 0.7f));
                 renderHandler->drawPointCloud(pointCloudComp.points, shader);
+            }
+            
+            if (triangleSurfaceManager.hasComponent(entity)) {
+                TriangleSurfaceMeshComponent& meshComp = triangleSurfaceManager.getComponent(entity);
+                //shader->setUniform("meshColor", glm::vec3(1.0f, 0.5f, 0.7f));
+                renderHandler->drawTriangleMesh(meshComp.vertices, meshComp.indices, shader);
             }
 
             if (colliderManager.hasComponent(entity) && showWireframe) {

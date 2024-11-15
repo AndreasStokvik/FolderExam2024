@@ -15,6 +15,8 @@ public:
 
     void drawPointCloud(const std::vector<glm::vec3>& points, const std::shared_ptr<Shader>& shader);
 
+    void drawTriangleMesh(const std::vector<glm::vec3>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Shader>& shader);
+
 private:
     void setupMesh(const Model& model);
     GLuint VAO, VBO, EBO;
