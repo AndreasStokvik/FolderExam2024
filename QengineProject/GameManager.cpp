@@ -23,10 +23,9 @@ void GameManager::init() {
     inputManagerComponent.addComponent(player, InputComponent());
     
     int surfaceEntity = entityManager.createEntity();
-    heightMapManager = std::make_shared<HeightMapHandler>("external_files/HeightMap.txt", 10000);
+    heightMapManager = std::make_shared<HeightMapHandler>("external_files/HeightMap.txt", 100);
     //pointCloudManager.addComponent(surfaceEntity, PointCloudComponent(heightMapManager->getHeightMapVector()));
-    triangleSurfaceManager.addComponent(surfaceEntity, TriangleSurfaceMeshComponent
-        (heightMapManager->getHeightMapVector(), heightMapManager->getNormals(), heightMapManager->getIndices()));
+    triangleSurfaceManager.addComponent(surfaceEntity, TriangleSurfaceMeshComponent (heightMapManager->getHeightMapVector(), heightMapManager->getIndices(), heightMapManager->getNormals()));
     transformManager.addComponent(surfaceEntity, TransformComponent(glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(1.0f)));
     //  --------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -91,13 +90,13 @@ void GameManager::render() {
 
             if (pointCloudManager.hasComponent(entity)) {
                 PointCloudComponent& pointCloudComp = pointCloudManager.getComponent(entity);
-                shader->setUniform("pointColor", glm::vec3(1.0f, 0.5f, 0.7f));
+                shader->setUniform("pointColor", glm::vec3(1.0f, 0.0f, 0.0f));
                 renderHandler->drawPointCloud(pointCloudComp.points, shader);
             }
-            
+
             if (triangleSurfaceManager.hasComponent(entity)) {
                 TriangleSurfaceMeshComponent& meshComp = triangleSurfaceManager.getComponent(entity);
-                //shader->setUniform("meshColor", glm::vec3(1.0f, 0.5f, 0.7f));
+                shader->setUniform("pointColor", glm::vec3(0.0f, 1.0f, 0.0f));
                 renderHandler->drawTriangleMesh(meshComp.vertices, meshComp.indices, shader);
             }
 
