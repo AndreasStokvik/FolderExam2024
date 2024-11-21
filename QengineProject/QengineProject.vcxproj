@@ -72,12 +72,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)\Linking\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Linking\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\libs\cgal\include;$(SolutionDir)\Linking\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Linking\lib;$(SolutionDir)\libs\cgal\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)\Linking\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Linking\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\libs\cgal\include;$(SolutionDir)\Linking\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Linking\lib;$(SolutionDir)\libs\cgal\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -120,8 +120,12 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)\libs\assimp\lib;$(SolutionDir)\libs\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc143-mt.lib;boost_system-vc143-mt-x64-1_86.lib;boost_filesystem-vc143-mt-x64-1_86.lib;boost_chrono-vc143-mt-x64-1_86.lib;boost_container-vc143-mt-x64-1_86.lib;boost_thread-vc143-mt-x64-1_86.lib;gmp.lib;gmpxx.lib;mpfr.lib;lzma.lib;zlib.lib;zstd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -140,8 +144,12 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)\libs\assimp\lib;$(SolutionDir)\libs\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc143-mt.lib;boost_system-vc143-mt-x64-1_86.lib;boost_filesystem-vc143-mt-x64-1_86.lib;boost_chrono-vc143-mt-x64-1_86.lib;boost_container-vc143-mt-x64-1_86.lib;boost_thread-vc143-mt-x64-1_86.lib;gmp.lib;gmpxx.lib;mpfr.lib;lzma.lib;zlib.lib;zstd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\components\CameraComponent.cpp" />

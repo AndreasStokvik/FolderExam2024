@@ -169,6 +169,9 @@ std::vector<glm::vec3> HeightMapHandler::loadPointsFromFile(const std::string& f
     std::string line;
     int pointCount = 0;
 
+    int barWidth = 50;
+    int processedLines = 0;
+
     while (std::getline(file, line) && (maxPoints < 0 || pointCount < maxPoints)) {
         std::stringstream ss(line);
         std::string xStr, yStr, zStr;
@@ -183,6 +186,20 @@ std::vector<glm::vec3> HeightMapHandler::loadPointsFromFile(const std::string& f
         else {
             std::cerr << "Error parsing line: " << line << std::endl;
         }
+
+        //processedLines++;
+        //if (processedLines % 100000 == 0 || processedLines == maxPoints) {
+        //    float progress = static_cast<float>(processedLines) / maxPoints;
+        //    int pos = barWidth * progress;
+        //    std::cout << "\r[";  // Start overwriting the same line
+        //    for (int i = 0; i < barWidth; ++i) {
+        //        if (i < pos) std::cout << "=";
+        //        else if (i == pos) std::cout << ">";
+        //        else std::cout << " ";
+        //    }
+        //    std::cout << "] " << int(progress * 100.0f) << "%";
+        //    std::flush(std::cout);
+        //}
     }
     std::cout << "number of points: " << pointCount << std::endl;
 
@@ -203,6 +220,10 @@ std::vector<unsigned int> HeightMapHandler::getIndices()
     for (const auto& index : indices) {
         std::cout << index << " ";
     }*/
+    return indices;
+}
+std::vector<unsigned int> HeightMapHandler::getTriangulationIndices()
+{
     std::vector<Triangle> triangles;
     Triangle superTriangle = createSuperTriangle(heightMapPoints);
     triangles.push_back(superTriangle);
@@ -217,8 +238,53 @@ std::vector<unsigned int> HeightMapHandler::getIndices()
     indices = std::get<1>(result);
     return indices;
 }
+
 std::vector<unsigned int> HeightMapHandler::setIndices(std::vector<unsigned int> newIndices)
 {
     indices = newIndices;
     return indices;
+}
+
+std::pair<std::vector<glm::vec3>, std::vector<unsigned int>> HeightMapHandler::BSplineSurface() {
+    std::vector<glm::vec3> vertices;
+    std::vector<unsigned int> indices;
+
+    // Ranges of the dataset in each direction
+    const unsigned int knotVectorUSize = 1600;
+    const unsigned int knotVectorVSize = 1200;
+
+    const unsigned int degree = 2;
+    std::vector<float> knotVectorU;
+    std::vector<float> knotVectorV;
+    std::vector<glm::vec3> controlPoints = heightMapPoints;
+
+    // Generate knot vector U
+    for (int i = 0; i < knotVectorUSize + degree + 1; i++) {
+        if (i < degree + 1) {
+            knotVectorU.push_back(0.0f); // Start
+        }
+        else if (i > knotVectorUSize - 1) {
+            knotVectorU.push_back(knotVectorUSize - degree); // End
+        }
+        else {
+            knotVectorU.push_back(i-degree);
+        }
+    }
+
+    // Generate knot vector V
+    for (int i = 0; i < knotVectorVSize + degree + 1; i++) {
+        if (i < degree + 1) {
+            knotVectorV.push_back(0.0f); // Start
+        }
+        else if (i > knotVectorVSize - 1) {
+            knotVectorV.push_back(knotVectorVSize - degree); // End
+        }
+        else {
+            knotVectorV.push_back(i - degree);
+        }
+    }
+
+
+
+    return { vertices, indices };
 }

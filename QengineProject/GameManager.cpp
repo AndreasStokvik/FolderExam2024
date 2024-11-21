@@ -23,8 +23,10 @@ void GameManager::init() {
     inputManagerComponent.addComponent(player, InputComponent());
     
     int surfaceEntity = entityManager.createEntity();
-    heightMapManager = std::make_shared<HeightMapHandler>("external_files/HeightMap.txt", 100);
-    //pointCloudManager.addComponent(surfaceEntity, PointCloudComponent(heightMapManager->getHeightMapVector()));
+    heightMapManager = std::make_shared<HeightMapHandler>("external_files/HeightMap.txt", -1);
+    heightMapManager->BSplineSurface();
+    pointCloudManager.addComponent(surfaceEntity, PointCloudComponent(heightMapManager->getHeightMapVector()));
+    //triangleSurfaceManager.addComponent(surfaceEntity, TriangleSurfaceMeshComponent (heightMapManager->getHeightMapVector(), heightMapManager->getTriangulationIndices(), heightMapManager->getNormals()));
     triangleSurfaceManager.addComponent(surfaceEntity, TriangleSurfaceMeshComponent (heightMapManager->getHeightMapVector(), heightMapManager->getIndices(), heightMapManager->getNormals()));
     transformManager.addComponent(surfaceEntity, TransformComponent(glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(1.0f)));
     //  --------------------------------------------------------------------------------------------------------------------------------------------------------

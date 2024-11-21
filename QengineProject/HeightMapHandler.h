@@ -14,7 +14,9 @@ public:
     std::vector<glm::vec3> getHeightMapVector();
     std::vector<glm::vec3> getNormals();
     std::vector<unsigned int> getIndices();
+    std::vector<unsigned int> getTriangulationIndices();
     std::vector<unsigned int> setIndices(std::vector<unsigned int> delaunayIndices);
+    std::pair<std::vector<glm::vec3>, std::vector<unsigned int>> BSplineSurface();
 private:
     std::vector<glm::vec3> heightMapPoints;
     std::vector<glm::vec3> normals;

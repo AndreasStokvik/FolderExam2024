@@ -61,6 +61,7 @@ void Shader::setLightingUniforms(const glm::vec3& lightColor, const glm::vec3& l
 // Load the shader source code from a file
 std::string Shader::loadShaderSource(const std::string& path) {
     std::ifstream shaderFile;
+
     shaderFile.open(path);
 
     if (!shaderFile.is_open()) {
