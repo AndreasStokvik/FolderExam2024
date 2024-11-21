@@ -6,6 +6,12 @@
 #include <iostream>
 #include <algorithm>
 
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Delaunay_triangulation_2.h>
+typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+typedef CGAL::Delaunay_triangulation_2<K> Delaunay;
+typedef K::Point_2 Point2D;
+
 class HeightMapHandler
 {
 public:
@@ -14,8 +20,8 @@ public:
     std::vector<glm::vec3> getHeightMapVector();
     std::vector<glm::vec3> getNormals();
     std::vector<unsigned int> getIndices();
+    std::vector<glm::vec3> generateNormals(const std::vector<unsigned int>& indices);
     std::vector<unsigned int> getTriangulationIndices();
-    std::vector<unsigned int> setIndices(std::vector<unsigned int> delaunayIndices);
     std::pair<std::vector<glm::vec3>, std::vector<unsigned int>> BSplineSurface();
 private:
     std::vector<glm::vec3> heightMapPoints;

@@ -15,7 +15,7 @@ uniform vec3 pointColor;            // Uniform color for point rendering
 
 void main() {
     // Ambient lighting
-    float ambientStrength = 0.25;
+    float ambientStrength = 0.4;
     vec3 ambient = ambientStrength * lightColor;
 
     // Diffuse lighting

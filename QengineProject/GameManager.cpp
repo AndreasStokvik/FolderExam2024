@@ -23,11 +23,13 @@ void GameManager::init() {
     inputManagerComponent.addComponent(player, InputComponent());
     
     int surfaceEntity = entityManager.createEntity();
-    heightMapManager = std::make_shared<HeightMapHandler>("external_files/HeightMap.txt", -1);
-    heightMapManager->BSplineSurface();
-    pointCloudManager.addComponent(surfaceEntity, PointCloudComponent(heightMapManager->getHeightMapVector()));
-    //triangleSurfaceManager.addComponent(surfaceEntity, TriangleSurfaceMeshComponent (heightMapManager->getHeightMapVector(), heightMapManager->getTriangulationIndices(), heightMapManager->getNormals()));
-    triangleSurfaceManager.addComponent(surfaceEntity, TriangleSurfaceMeshComponent (heightMapManager->getHeightMapVector(), heightMapManager->getIndices(), heightMapManager->getNormals()));
+    heightMapManager = std::make_shared<HeightMapHandler>("external_files/HeightMap.txt", 50000);
+    //heightMapManager->BSplineSurface();
+    //pointCloudManager.addComponent(surfaceEntity, PointCloudComponent(heightMapManager->getHeightMapVector()));
+    std::vector<unsigned int> indices = heightMapManager->getTriangulationIndices();
+    std::vector<glm::vec3> normals = heightMapManager->generateNormals(indices);
+    triangleSurfaceManager.addComponent(surfaceEntity, TriangleSurfaceMeshComponent (heightMapManager->getHeightMapVector(), indices, normals));
+    //triangleSurfaceManager.addComponent(surfaceEntity, TriangleSurfaceMeshComponent (heightMapManager->getHeightMapVector(), heightMapManager->getIndices(), heightMapManager->getNormals()));
     transformManager.addComponent(surfaceEntity, TransformComponent(glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(1.0f)));
     //  --------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -38,7 +40,7 @@ void GameManager::init() {
     shader->use();
     camera->setProjectionUniform(shader);
     transform->setViewUniform(shader);
-    shader->setLightingUniforms(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(2.0f, 10.0f, 2.0f), camera->getPosition());
+    shader->setLightingUniforms(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 100.0f, 0.0f), camera->getPosition());
 }
 
 void GameManager::run()
@@ -99,7 +101,7 @@ void GameManager::render() {
             if (triangleSurfaceManager.hasComponent(entity)) {
                 TriangleSurfaceMeshComponent& meshComp = triangleSurfaceManager.getComponent(entity);
                 shader->setUniform("pointColor", glm::vec3(0.0f, 1.0f, 0.0f));
-                renderHandler->drawTriangleMesh(meshComp.vertices, meshComp.indices, shader);
+                renderHandler->drawTriangleMesh(meshComp.vertices, meshComp.indices, meshComp.normals, shader);
             }
 
             if (colliderManager.hasComponent(entity) && showWireframe) {
