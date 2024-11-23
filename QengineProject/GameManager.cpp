@@ -16,14 +16,17 @@ void GameManager::init() {
 
     // Entity creation  ----------------------------------------------------------------------------------------------------------------------------------------
     int player = entityManager.createEntity();
+    auto sphereModel = std::make_shared<Model>();
+    sphereModel->createSphere(1.0f, 36, 18);
+    renderManager.addComponent(player, RenderComponent(sphereModel));
     //renderManager.addComponent(player, RenderComponent(std::make_shared<Model>("models/cube2.obj")));
-    //colliderManager.addComponent(player, ColliderComponent(ColliderType::SPHERE, glm::vec3(0.0f), glm::vec3(20.0f)));
+    colliderManager.addComponent(player, ColliderComponent(ColliderType::SPHERE, glm::vec3(0.0f), glm::vec3(20.0f)));
     transformManager.addComponent(player, TransformComponent(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f)));
     velocityManager.addComponent(player, VelocityComponent(glm::vec3(0.0f, 0.0f, 0.0f)));
     inputManagerComponent.addComponent(player, InputComponent());
     
     int surfaceEntity = entityManager.createEntity();
-    heightMapManager = std::make_shared<HeightMapHandler>("external_files/HeightMap.txt", 50000);
+    heightMapManager = std::make_shared<HeightMapHandler>("external_files/HeightMap.txt", 10000);
     //heightMapManager->BSplineSurface();
     //pointCloudManager.addComponent(surfaceEntity, PointCloudComponent(heightMapManager->getHeightMapVector()));
     std::vector<unsigned int> indices = heightMapManager->getTriangulationIndices();
@@ -40,7 +43,7 @@ void GameManager::init() {
     shader->use();
     camera->setProjectionUniform(shader);
     transform->setViewUniform(shader);
-    shader->setLightingUniforms(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 100.0f, 0.0f), camera->getPosition());
+    shader->setLightingUniforms(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(50.0f, 50.0f, 0.0f), camera->getPosition());
 }
 
 void GameManager::run()

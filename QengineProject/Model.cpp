@@ -5,6 +5,10 @@
 #include <iostream>
 #include <filesystem>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 Model::Model(const std::string& path) {
     loadModel(path);
 }
@@ -159,4 +163,64 @@ std::vector<unsigned int> Model::loadMaterialTextures(aiMaterial* mat, aiTexture
         textures.push_back(textureID);
     }
     return textures;
+}
+
+void generateSphere(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, float radius, unsigned int sectorCount, unsigned int stackCount) {
+    vertices.clear();
+    indices.clear();
+
+    float x, y, z, xy;                           // vertex position
+    float nx, ny, nz, lengthInv = 1.0f / radius; // normal
+    float s, t;                                  // texture coordinates
+
+    float sectorStep = 2 * M_PI / sectorCount;
+    float stackStep = M_PI / stackCount;
+    float stackAngle, sectorAngle;
+
+    // Generate vertices
+    for (unsigned int i = 0; i <= stackCount; ++i) {
+        stackAngle = M_PI / 2 - i * stackStep; // starting from pi/2 to -pi/2
+        xy = radius * cosf(stackAngle);       // r * cos(u)
+        z = radius * sinf(stackAngle);        // r * sin(u)
+
+        for (unsigned int j = 0; j <= sectorCount; ++j) {
+            sectorAngle = j * sectorStep; // starting from 0 to 2pi
+
+            x = xy * cosf(sectorAngle); // x = r * cos(u) * cos(v)
+            y = xy * sinf(sectorAngle); // y = r * cos(u) * sin(v)
+
+            Vertex vertex;
+            vertex.Position = glm::vec3(x, y, z);
+            vertex.Normal = glm::vec3(x * lengthInv, y * lengthInv, z * lengthInv);
+            vertex.TexCoords = glm::vec2((float)j / sectorCount, (float)i / stackCount);
+            vertices.push_back(vertex);
+        }
+    }
+
+    // Generate indices
+    unsigned int k1, k2;
+    for (unsigned int i = 0; i < stackCount; ++i) {
+        k1 = i * (sectorCount + 1);
+        k2 = k1 + sectorCount + 1;
+
+        for (unsigned int j = 0; j < sectorCount; ++j, ++k1, ++k2) {
+            if (i != 0) {
+                indices.push_back(k1);
+                indices.push_back(k2);
+                indices.push_back(k1 + 1);
+            }
+            if (i != (stackCount - 1)) {
+                indices.push_back(k1 + 1);
+                indices.push_back(k2);
+                indices.push_back(k2 + 1);
+            }
+        }
+    }
+}
+
+void Model::createSphere(float radius, unsigned int sectorCount, unsigned int stackCount) {
+    std::vector<Vertex> sphereVertices;
+    std::vector<unsigned int> sphereIndices;
+    generateSphere(sphereVertices, sphereIndices, radius, sectorCount, stackCount);
+    setMesh(sphereVertices, sphereIndices);
 }

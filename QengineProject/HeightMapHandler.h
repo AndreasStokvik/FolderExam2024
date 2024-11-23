@@ -22,7 +22,6 @@ public:
     std::vector<unsigned int> getIndices();
     std::vector<glm::vec3> generateNormals(const std::vector<unsigned int>& indices);
     std::vector<unsigned int> getTriangulationIndices();
-    std::pair<std::vector<glm::vec3>, std::vector<unsigned int>> BSplineSurface();
 private:
     std::vector<glm::vec3> heightMapPoints;
     std::vector<glm::vec3> normals;

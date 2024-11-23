@@ -109,51 +109,5 @@ std::vector<unsigned int> HeightMapHandler::getTriangulationIndices()
         indices.push_back(pointIndexMap[v2]);
     }
 
-    //generateNormals();
-
     return indices;
-}
-
-std::pair<std::vector<glm::vec3>, std::vector<unsigned int>> HeightMapHandler::BSplineSurface() {
-    std::vector<glm::vec3> vertices;
-    std::vector<unsigned int> indices;
-
-    // Ranges of the dataset in each direction
-    const unsigned int knotVectorUSize = 1600;
-    const unsigned int knotVectorVSize = 1200;
-
-    const unsigned int degree = 2;
-    std::vector<float> knotVectorU;
-    std::vector<float> knotVectorV;
-    std::vector<glm::vec3> controlPoints = heightMapPoints;
-
-    // Generate knot vector U
-    for (int i = 0; i < knotVectorUSize + degree + 1; i++) {
-        if (i < degree + 1) {
-            knotVectorU.push_back(0.0f); // Start
-        }
-        else if (i > knotVectorUSize - 1) {
-            knotVectorU.push_back(knotVectorUSize - degree); // End
-        }
-        else {
-            knotVectorU.push_back(i-degree);
-        }
-    }
-
-    // Generate knot vector V
-    for (int i = 0; i < knotVectorVSize + degree + 1; i++) {
-        if (i < degree + 1) {
-            knotVectorV.push_back(0.0f); // Start
-        }
-        else if (i > knotVectorVSize - 1) {
-            knotVectorV.push_back(knotVectorVSize - degree); // End
-        }
-        else {
-            knotVectorV.push_back(i - degree);
-        }
-    }
-
-
-
-    return { vertices, indices };
 }

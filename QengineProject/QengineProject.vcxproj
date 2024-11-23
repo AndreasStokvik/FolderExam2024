@@ -123,7 +123,8 @@
       <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc143-mt.lib;boost_system-vc143-mt-x64-1_86.lib;boost_filesystem-vc143-mt-x64-1_86.lib;boost_chrono-vc143-mt-x64-1_86.lib;boost_container-vc143-mt-x64-1_86.lib;boost_thread-vc143-mt-x64-1_86.lib;gmp.lib;gmpxx.lib;mpfr.lib;lzma.lib;zlib.lib;zstd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\libs\cgal\gmp-10.dll" "$(OutDir)"</Command>
+      <Command>copy "$(SolutionDir)\libs\cgal\gmp-10.dll" "$(OutDir)"
+copy "$(SolutionDir)\libs\assimp\lib\assimp-vc143-mt.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -146,7 +147,8 @@
       <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc143-mt.lib;boost_system-vc143-mt-x64-1_86.lib;boost_filesystem-vc143-mt-x64-1_86.lib;boost_chrono-vc143-mt-x64-1_86.lib;boost_container-vc143-mt-x64-1_86.lib;boost_thread-vc143-mt-x64-1_86.lib;gmp.lib;gmpxx.lib;mpfr.lib;lzma.lib;zlib.lib;zstd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\libs\cgal\gmp-10.dll" "$(OutDir)"</Command>
+      <Command>copy "$(SolutionDir)\libs\cgal\gmp-10.dll" "$(OutDir)"
+copy "$(SolutionDir)\libs\assimp\lib\assimp-vc143-mt.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

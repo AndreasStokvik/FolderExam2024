@@ -32,6 +32,8 @@ public:
 
     std::vector<unsigned int> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
 
+    void createSphere(float radius, unsigned int sectorCount, unsigned int stackCount);
+
     const std::vector<Vertex>& getVertices() const { return vertices; }
     const std::vector<unsigned int>& getIndices() const { return indices; }
     const std::vector<unsigned int>& getTextures() const { return textures; }
