@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "Model.h"
 #include "ColliderMeshFactory.h"
+#include "EntityFactory.h"
 #include "Transform.h"
 #include "ImGuiManager.h"
 
@@ -23,7 +24,6 @@
 // ECS
 #include "ComponentManager.h"
 #include "EntityManager.h"
-#include "Entity.h"
 #include "../../components/RenderComponent.h"
 #include "../../components/TransformComponent.h"
 #include "../../components/VelocityComponent.h"
@@ -61,11 +61,11 @@ private:
     std::shared_ptr<HeightMapHandler> heightMapManager;
 
     std::shared_ptr<Model> model;
+    std::shared_ptr<EntityFactory> entityFactory;
     std::shared_ptr<Shader> shader;
 
     // ECS
     EntityManager entityManager;
-    Entity entity;
     ComponentManager<TransformComponent> transformManager;
     ComponentManager<RenderComponent> renderManager;
     ComponentManager<VelocityComponent> velocityManager;

@@ -173,6 +173,7 @@ copy "$(SolutionDir)\libs\assimp\lib\assimp-vc143-mt.dll" "$(OutDir)"</Command>
     <ClCompile Include="ColliderMeshFactory.cpp" />
     <ClCompile Include="ComponentManager.cpp" />
     <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="EntityFactory.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="HeightMapHandler.cpp" />
@@ -210,6 +211,7 @@ copy "$(SolutionDir)\libs\assimp\lib\assimp-vc143-mt.dll" "$(OutDir)"</Command>
     <ClInclude Include="ColliderMeshFactory.h" />
     <ClInclude Include="ComponentManager.h" />
     <ClInclude Include="Entity.h" />
+    <ClInclude Include="EntityFactory.h" />
     <ClInclude Include="EntityManager.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="HeightMapHandler.h" />

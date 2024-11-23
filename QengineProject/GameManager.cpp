@@ -15,21 +15,11 @@ void GameManager::init() {
 
 
     // Entity creation  ----------------------------------------------------------------------------------------------------------------------------------------
-    int player = entityManager.createEntity();
-    auto sphereModel = std::make_shared<Model>();
-    sphereModel->createSphere(1.0f, 36, 18);
-    renderManager.addComponent(player, RenderComponent(sphereModel));
-    //renderManager.addComponent(player, RenderComponent(std::make_shared<Model>("models/cube2.obj")));
-    colliderManager.addComponent(player, ColliderComponent(ColliderType::SPHERE, glm::vec3(0.0f), glm::vec3(20.0f)));
-    transformManager.addComponent(player, TransformComponent(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f)));
-    velocityManager.addComponent(player, VelocityComponent(glm::vec3(0.0f, 0.0f, 0.0f)));
-    inputManagerComponent.addComponent(player, InputComponent());
+    entityFactory = std::make_shared<EntityFactory>(entityManager, transformManager, renderManager, velocityManager, inputManagerComponent, colliderManager, triangleSurfaceManager, heightMapManager);
     
-    int surfaceEntity = entityManager.createEntity();
-    heightMapManager = std::make_shared<HeightMapHandler>("external_files/HeightMap.txt", 10000);
-    //pointCloudManager.addComponent(surfaceEntity, PointCloudComponent(heightMapManager->getHeightMapVector()));
-    triangleSurfaceManager.addComponent(surfaceEntity, TriangleSurfaceMeshComponent (heightMapManager->getHeightMapVector(), heightMapManager->getIndices(),heightMapManager->generateNormals(heightMapManager->getTriangulationIndices())));
-    transformManager.addComponent(surfaceEntity, TransformComponent(glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(1.0f)));
+    int player = entityFactory->createPlayer(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+    int sphere = entityFactory->createSphere(glm::vec3(5.0f, 0.0f, 0.0f), 1.0f, glm::vec3(1.0f));
+    int surface = entityFactory->createSurface("external_files/HeightMap.txt", 10000, glm::vec3(1.0f));
     //  --------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
