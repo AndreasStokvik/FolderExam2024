@@ -10,7 +10,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitchw)
     fov(90.0f), nearPlane(0.1f), farPlane(1000.0f) {
     up = glm::vec3(0.0f, 1.0f, 0.0f),
     yaw = -90.0f,
-    pitch = 0.0f,
+    pitch = -15.0f,
 
     this->position = position;
     this->worldUp = up;
@@ -114,8 +114,8 @@ void Camera::followObject(const glm::vec3& objectPosition, float objectYaw) {
     float offsetX = distance * glm::sin(glm::radians(objectYaw));
     float offsetZ = distance * glm::cos(glm::radians(objectYaw));
 
-    glm::vec3 cameraPos = objectPosition - glm::vec3(-offsetX, cameraOffset.y, -offsetZ);
-
+    glm::vec3 cameraPos = objectPosition - glm::vec3(-offsetX, cameraOffset.y -5, -offsetZ);
     setPosition(cameraPos);
-    setTarget(objectPosition);
+
+    updateCameraVectors();
 }

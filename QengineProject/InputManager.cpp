@@ -92,16 +92,18 @@ void InputManager::handleMouseMovement(double xpos, double ypos, const std::shar
     }
 
     float xoffset = static_cast<float>(xpos) - lastX;
+    float yoffset = lastY - static_cast<float>(ypos);
     lastX = static_cast<float>(xpos);
+    lastY = static_cast<float>(ypos);
 
     if (mouseControl) {
         for (int entity : entityManager.getEntities()) {
             if (inputManagerComponent.hasComponent(entity)) {
                 TransformComponent& transformComp = transformManager.getComponent(entity);
-                float objectYawOffset = xoffset * objectSensitivity;
-                transformComp.rotation.y += objectYawOffset;
+                transformComp.rotation.y += xoffset * objectSensitivity;
             }
         }
+        camera->processMouseMovement(xoffset, yoffset);
     }
 }
 

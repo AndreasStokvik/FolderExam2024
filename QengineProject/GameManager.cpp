@@ -11,20 +11,19 @@ void GameManager::init() {
     physicsSystem = std::make_shared<PhysicsSystem>(entityManager, transformManager, velocityManager);
     inputSystem = std::make_shared<InputSystem>(entityManager, inputManagerComponent, velocityManager, inputManager, transformManager);
     renderHandler = std::make_shared<RenderHandler>();
-    imguiManager = std::make_shared<ImGuiManager>(window);
-
 
     // Entity creation  ----------------------------------------------------------------------------------------------------------------------------------------
-    entityFactory = std::make_shared<EntityFactory>(entityManager, transformManager, renderManager, velocityManager, inputManagerComponent, colliderManager, triangleSurfaceManager, heightMapManager);
+    entityFactory = std::make_shared<EntityFactory>(entityManager, transformManager, renderManager, velocityManager, inputManagerComponent, colliderManager, triangleSurfaceManager, pointCloudManager, heightMapManager);
     
     int player = entityFactory->createPlayer(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-    int sphere = entityFactory->createSphere(glm::vec3(5.0f, 0.0f, 0.0f), 1.0f, glm::vec3(1.0f));
-    int surface = entityFactory->createSurface("external_files/HeightMap.txt", 10000, glm::vec3(1.0f));
+    int surface = entityFactory->createSurface("external_files/HeightMap.txt", 100000, glm::vec3(1.0f));
+    //int sphere = entityFactory->createSphere(glm::vec3(5.0f, 0.0f, 0.0f), 1.0f, glm::vec3(1.0f));
+    //int pointCloud = entityFactory->createPointCloud("external_files/HeightMap.txt", -1, glm::vec3(1.0f));
     //  --------------------------------------------------------------------------------------------------------------------------------------------------------
-
 
     shader = std::make_shared<Shader>("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl", camera);
     transform = std::make_shared<Transform>(camera, shader);
+    imguiManager = std::make_shared<ImGuiManager>(window);
 
     shader->use();
     camera->setProjectionUniform(shader);
@@ -101,8 +100,6 @@ void GameManager::render() {
         }
     }
 
-    //renderHandler->drawPointCloud(heightMapPoints, shader);
-
     if (showImguiDebug) {
         //imguiManager->DemoWindow("demo window");
         imguiManager->BasicCheckbox("Debug Options", "Show Wireframe", showWireframe);
@@ -118,8 +115,4 @@ void GameManager::processInput() {
     if (!ImGui::GetIO().WantCaptureKeyboard) {
         inputManager->processInput(window, camera);
     }
-}
-
-void GameManager::toggleImguiDebug() {
-    showImguiDebug = !showImguiDebug;
 }

@@ -40,7 +40,7 @@ public:
     void init();                       // Initializes systems
     void run();                        // Main game loop
     void shutdown();                   // Cleans up resources
-    void toggleImguiDebug();           // Toggles the debug UI
+    void toggleImguiDebug() {showImguiDebug = !showImguiDebug;}; // Toggles the debug UI
 
     std::shared_ptr<Camera> camera;
     std::shared_ptr<Window> window;

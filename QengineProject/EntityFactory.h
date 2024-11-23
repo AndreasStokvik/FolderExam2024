@@ -21,6 +21,7 @@ public:
         ComponentManager<InputComponent>& inputManagerComponent,
         ComponentManager<ColliderComponent>& colliderManager,
         ComponentManager<TriangleSurfaceMeshComponent>& triangleSurfaceManager,
+        ComponentManager<PointCloudComponent>& pointCloudManager,
         std::shared_ptr<HeightMapHandler> heightMapManager)
         : entityManager(entityManager),
         transformManager(transformManager),
@@ -29,12 +30,14 @@ public:
         inputManagerComponent(inputManagerComponent),
         colliderManager(colliderManager),
         triangleSurfaceManager(triangleSurfaceManager),
+        pointCloudManager(pointCloudManager),
         heightMapManager(heightMapManager) {
     }
 
     int createPlayer(const glm::vec3& position, const glm::vec3& scale, const glm::vec3& velocity);
     int createSphere(const glm::vec3& position, float radius, const glm::vec3& scale);
     int createSurface(const std::string& heightMapFile, int resolution, const glm::vec3& scale);
+    int createPointCloud(const std::string& heightMapFile, int resolution, const glm::vec3& scale);
 
 private:
     EntityManager& entityManager;
@@ -44,5 +47,6 @@ private:
     ComponentManager<InputComponent>& inputManagerComponent;
     ComponentManager<ColliderComponent>& colliderManager;
     ComponentManager<TriangleSurfaceMeshComponent>& triangleSurfaceManager;
+    ComponentManager<PointCloudComponent>& pointCloudManager;
     std::shared_ptr<HeightMapHandler> heightMapManager;
 };
