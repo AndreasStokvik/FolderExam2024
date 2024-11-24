@@ -43,7 +43,6 @@ void RenderHandler::drawPointCloud(const std::vector<glm::vec3>& points, const s
 
     shader->use();
     glBindVertexArray(pointVAO);
-    shader->setUniform("pointSize", 1.0f);
     shader->setUniform("hasTexture", false);
     glDrawArrays(GL_POINTS, 0, points.size());
 
