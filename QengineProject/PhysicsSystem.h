@@ -7,30 +7,29 @@
 
 #include "EntityManager.h"
 #include "ComponentManager.h"
+#include "HeightMapHandler.h"
 #include "../../components/TransformComponent.h"
 #include "../../components/VelocityComponent.h"
+#include "../../components/ColliderComponent.h"
 
 class PhysicsSystem {
 public:
     PhysicsSystem(EntityManager& entityManager,
         ComponentManager<TransformComponent>& transformManager,
-        ComponentManager<VelocityComponent>& velocityManager)
-        : entityManager(entityManager), transformManager(transformManager), velocityManager(velocityManager) {}
+        ComponentManager<VelocityComponent>& velocityManager,
+        ComponentManager<ColliderComponent>& colliderManager,
+        std::shared_ptr<HeightMapHandler>& heightMapManager)
+        : entityManager(entityManager), transformManager(transformManager), velocityManager(velocityManager),
+        colliderManager(colliderManager), heightMapManager(heightMapManager) {}
 
-    void update(float deltaTime) {
-        for (int entity : entityManager.getEntities()) {
-            if (transformManager.hasComponent(entity) && velocityManager.hasComponent(entity)) {
-                TransformComponent& transformComp = transformManager.getComponent(entity);
-                VelocityComponent& velocityComp = velocityManager.getComponent(entity);
+    void update(float deltaTime);
 
-                transformComp.position += velocityComp.velocity * deltaTime;
-                //std::cout << "velocity: " << glm::to_string(velocityComp.velocity) << std::endl;
-            }
-        }
-    }
+    glm::vec3 getSurfaceNormal(const glm::vec3& position);
 
 private:
     EntityManager& entityManager;
     ComponentManager<TransformComponent>& transformManager;
     ComponentManager<VelocityComponent>& velocityManager;
+    ComponentManager<ColliderComponent>& colliderManager;
+    std::shared_ptr<HeightMapHandler>& heightMapManager;
 };

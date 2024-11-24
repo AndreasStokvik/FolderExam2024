@@ -22,7 +22,7 @@ public:
         ComponentManager<ColliderComponent>& colliderManager,
         ComponentManager<TriangleSurfaceMeshComponent>& triangleSurfaceManager,
         ComponentManager<PointCloudComponent>& pointCloudManager,
-        std::shared_ptr<HeightMapHandler> heightMapManager)
+        std::shared_ptr<HeightMapHandler>& heightMapManager)
         : entityManager(entityManager),
         transformManager(transformManager),
         renderManager(renderManager),
@@ -48,5 +48,5 @@ private:
     ComponentManager<ColliderComponent>& colliderManager;
     ComponentManager<TriangleSurfaceMeshComponent>& triangleSurfaceManager;
     ComponentManager<PointCloudComponent>& pointCloudManager;
-    std::shared_ptr<HeightMapHandler> heightMapManager;
+    std::shared_ptr<HeightMapHandler>& heightMapManager;
 };

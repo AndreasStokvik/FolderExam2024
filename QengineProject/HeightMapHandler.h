@@ -22,6 +22,8 @@ public:
     std::vector<unsigned int> getIndices();
     std::vector<glm::vec3> generateNormals(const std::vector<unsigned int>& indices);
     std::vector<unsigned int> getTriangulationIndices();
+    glm::vec3 getClosestNormal(float x, float z) const;
+    float getHeightAt(float x, float z) const;
 private:
     std::vector<glm::vec3> heightMapPoints;
     std::vector<glm::vec3> normals;

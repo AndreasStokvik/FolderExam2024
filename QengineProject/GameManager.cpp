@@ -8,14 +8,13 @@ void GameManager::init() {
     camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
     window = std::make_shared<Window>(1280, 720, "OpenGL Window", camera);
     inputManager = std::make_shared<InputManager>(window, camera, inputManagerComponent, entityManager, transformManager, *this);
-    physicsSystem = std::make_shared<PhysicsSystem>(entityManager, transformManager, velocityManager);
     inputSystem = std::make_shared<InputSystem>(entityManager, inputManagerComponent, velocityManager, inputManager, transformManager);
     renderHandler = std::make_shared<RenderHandler>();
 
     // Entity creation  ----------------------------------------------------------------------------------------------------------------------------------------
     entityFactory = std::make_shared<EntityFactory>(entityManager, transformManager, renderManager, velocityManager, inputManagerComponent, colliderManager, triangleSurfaceManager, pointCloudManager, heightMapManager);
     
-    int player = entityFactory->createPlayer(glm::vec3(50.0f, 1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+    int player = entityFactory->createPlayer(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f), glm::vec3(1.0f));
     int surface = entityFactory->createSurface("external_files/HeightMap.txt", 100000, glm::vec3(1.0f));
     int sphere = entityFactory->createSphere(glm::vec3(50.0f, 50.0f, 50.0f), 1.0f, glm::vec3(1.0f));
     //int pointCloud = entityFactory->createPointCloud("external_files/HeightMap.txt", -1, glm::vec3(1.0f));
@@ -29,6 +28,7 @@ void GameManager::init() {
     camera->setProjectionUniform(shader);
     transform->setViewUniform(shader);
     shader->setLightingUniforms(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(50.0f, 50.0f, 0.0f), camera->getPosition());
+    physicsSystem = std::make_shared<PhysicsSystem>(entityManager, transformManager, velocityManager, colliderManager, heightMapManager);
 }
 
 void GameManager::run()
@@ -83,7 +83,6 @@ void GameManager::render() {
             if (pointCloudManager.hasComponent(entity)) {
                 PointCloudComponent& pointCloudComp = pointCloudManager.getComponent(entity);
                 shader->setUniform("pointColor", glm::vec3(1.0f, 0.0f, 0.0f));
-                shader->setUniform("pointSize", 2.0f);
                 renderHandler->drawPointCloud(pointCloudComp.points, shader);
             }
 
@@ -96,8 +95,10 @@ void GameManager::render() {
             if (colliderManager.hasComponent(entity) && showWireframe) {
                 ColliderComponent& colliderComp = colliderManager.getComponent(entity);
                 Model colliderMesh = ColliderMeshFactory::createColliderMesh(colliderComp);
+                shader->setUniform("pointColor", glm::vec3(0.0f, 0.0f, 1.0f));
                 renderHandler->draw(colliderMesh, shader, true);
             }
+            //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
     }
 

@@ -111,3 +111,88 @@ std::vector<unsigned int> HeightMapHandler::getTriangulationIndices()
 
     return indices;
 }
+
+glm::vec3 HeightMapHandler::getClosestNormal(float x, float z) const {
+    // Find the closest point in the height map
+    float minDistance = std::numeric_limits<float>::max();
+    glm::vec3 closestNormal(0.0f);
+
+    for (size_t i = 0; i < heightMapPoints.size(); ++i) {
+        const glm::vec3& point = heightMapPoints[i];
+
+        // Ignore the y-axis since x and z define the grid
+        float distance = glm::distance(glm::vec2(x, z), glm::vec2(point.x, point.z));
+
+        if (distance < minDistance) {
+            minDistance = distance;
+            closestNormal = normals[i];
+        }
+    }
+
+    return closestNormal;
+}
+
+float HeightMapHandler::getHeightAt(float x, float z) const {
+    if (heightMapPoints.empty()) {
+        throw std::runtime_error("Height map is empty.");
+    }
+
+    float adjustedX = x;
+    float adjustedZ = z;
+
+    int gridX = static_cast<int>(std::floor(adjustedX));
+    int gridZ = static_cast<int>(std::floor(adjustedZ));
+
+    glm::vec3 h00, h10, h01, h11;
+    bool foundH00 = false, foundH10 = false, foundH01 = false, foundH11 = false;
+
+    for (const auto& point : heightMapPoints) {
+        if (!foundH00 && static_cast<int>(point.x) == gridX && static_cast<int>(point.z) == gridZ) {
+            h00 = point;
+            foundH00 = true;
+        }
+        if (!foundH10 && static_cast<int>(point.x) == gridX + 1 && static_cast<int>(point.z) == gridZ) {
+            h10 = point;
+            foundH10 = true;
+        }
+        if (!foundH01 && static_cast<int>(point.x) == gridX && static_cast<int>(point.z) == gridZ + 1) {
+            h01 = point;
+            foundH01 = true;
+        }
+        if (!foundH11 && static_cast<int>(point.x) == gridX + 1 && static_cast<int>(point.z) == gridZ + 1) {
+            h11 = point;
+            foundH11 = true;
+        }
+
+        if (foundH00 && foundH10 && foundH01 && foundH11) {
+            break;
+        }
+    }
+
+    if (!foundH00 || !foundH10 || !foundH01 || !foundH11) {
+        // Fallback: Find nearest height point
+        float nearestHeight = heightMapPoints[0].y;
+        float nearestDistanceSq = std::numeric_limits<float>::max();
+
+        for (const auto& point : heightMapPoints) {
+            float dx = point.x - adjustedX;
+            float dz = point.z - adjustedZ;
+            float distanceSq = dx * dx + dz * dz;
+
+            if (distanceSq < nearestDistanceSq) {
+                nearestHeight = point.y;
+                nearestDistanceSq = distanceSq;
+            }
+        }
+
+        return nearestHeight; // Return the height of the nearest point
+    }
+
+    float tx = adjustedX - gridX;
+    float tz = adjustedZ - gridZ;
+
+    float h0 = glm::mix(h00.y, h10.y, tx);
+    float h1 = glm::mix(h01.y, h11.y, tx);
+
+    return glm::mix(h0, h1, tz);
+}
