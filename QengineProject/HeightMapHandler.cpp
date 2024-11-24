@@ -1,6 +1,6 @@
 #include "HeightMapHandler.h"
-#include <glm/vec3.hpp>
 #include <glm/glm.hpp>
+#include <glm/vec3.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -113,23 +113,50 @@ std::vector<unsigned int> HeightMapHandler::getTriangulationIndices()
 }
 
 glm::vec3 HeightMapHandler::getClosestNormal(float x, float z) const {
-    // Find the closest point in the height map
-    float minDistance = std::numeric_limits<float>::max();
-    glm::vec3 closestNormal(0.0f);
+    if (heightMapPoints.empty() || indices.empty()) {
+        throw std::runtime_error("Height map points or indices are not initialized.");
+    }
 
-    for (size_t i = 0; i < heightMapPoints.size(); ++i) {
-        const glm::vec3& point = heightMapPoints[i];
+    glm::vec3 position(x, 0.0f, z); // Project position onto XZ-plane
 
-        // Ignore the y-axis since x and z define the grid
-        float distance = glm::distance(glm::vec2(x, z), glm::vec2(point.x, point.z));
+    // Loop through triangles in the height map (indices are in groups of 3)
+    for (size_t i = 0; i < indices.size(); i += 3) {
+        // Get the vertices of the current triangle
+        glm::vec3 v0 = heightMapPoints[indices[i]];
+        glm::vec3 v1 = heightMapPoints[indices[i + 1]];
+        glm::vec3 v2 = heightMapPoints[indices[i + 2]];
 
-        if (distance < minDistance) {
-            minDistance = distance;
-            closestNormal = normals[i];
+        // Check if the point lies inside the triangle using barycentric coordinates
+        if (isPointInTriangle(position, v0, v1, v2)) {
+            // Compute the normal for the triangle
+            glm::vec3 edge1 = v1 - v0;
+            glm::vec3 edge2 = v2 - v0;
+            glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+            return normal;
         }
     }
 
-    return closestNormal;
+    // Fallback: If no triangle was found, return the default normal (or handle differently)
+    return glm::vec3(0.0f, 1.0f, 0.0f);
+}
+
+bool HeightMapHandler::isPointInTriangle(const glm::vec3& p, const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2) const {
+    glm::vec3 v0v1 = v1 - v0;
+    glm::vec3 v0v2 = v2 - v0;
+    glm::vec3 v0p = p - v0;
+
+    float dot00 = glm::dot(v0v1, v0v1);
+    float dot01 = glm::dot(v0v1, v0v2);
+    float dot02 = glm::dot(v0v1, v0p);
+    float dot11 = glm::dot(v0v2, v0v2);
+    float dot12 = glm::dot(v0v2, v0p);
+
+    float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+    float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+    // Check if the point is inside the triangle (barycentric coordinates must be between 0 and 1)
+    return (u >= 0.0f && v >= 0.0f && u + v <= 1.0f);
 }
 
 float HeightMapHandler::getHeightAt(float x, float z) const {
