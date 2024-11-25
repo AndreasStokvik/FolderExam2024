@@ -22,7 +22,7 @@ public:
     std::vector<unsigned int> getIndices();
     std::vector<glm::vec3> generateNormals(const std::vector<unsigned int>& indices);
     std::vector<unsigned int> getTriangulationIndices();
-    glm::vec3 getClosestNormal(float x, float z) const;
+    glm::vec3 getClosestNormal(float x, float z, glm::vec3 scale) const;
     bool isPointInTriangle(const glm::vec3& p, const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2) const;
     float getHeightAt(float x, float z) const;
 private:

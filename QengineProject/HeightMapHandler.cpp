@@ -1,6 +1,6 @@
 #include "HeightMapHandler.h"
 #include <glm/glm.hpp>
-#include <glm/vec3.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -11,31 +11,77 @@ HeightMapHandler::HeightMapHandler(const std::string& filePath, int maxPoints) {
 
 std::vector<glm::vec3> HeightMapHandler::loadPointsFromFile(const std::string& filePath, int maxPoints) {
     std::ifstream file(filePath);
-    std::vector<glm::vec3> points;
+
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file: " << filePath << std::endl;
+        return {};
+    }
+
     file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-    std::string line;
+    glm::vec3 minPoint(std::numeric_limits<float>::max());
+    glm::vec3 maxPoint(std::numeric_limits<float>::lowest());
     int pointCount = 0;
 
+    std::string line;
     while (std::getline(file, line) && (maxPoints < 0 || pointCount < maxPoints)) {
         std::stringstream ss(line);
         std::string xStr, yStr, zStr;
 
         if (std::getline(ss, xStr, ',') && std::getline(ss, yStr, ',') && std::getline(ss, zStr, ',')) {
-            float x = std::stof(xStr) - 607200;
-            float y = std::stof(yStr) - 6750618;
-            float z = std::stof(zStr) - 270;
-            points.emplace_back(x, z, y); // Swap y/z for convenience
+            float x = std::stof(xStr);
+            float y = std::stof(yStr);
+            float z = std::stof(zStr);
+
+            minPoint.x = std::min(minPoint.x, x);
+            minPoint.y = std::min(minPoint.y, y);
+            minPoint.z = std::min(minPoint.z, z);
+
+            maxPoint.x = std::max(maxPoint.x, x);
+            maxPoint.y = std::max(maxPoint.y, y);
+            maxPoint.z = std::max(maxPoint.z, z);
+
+            pointCount++;
+        }
+    }
+
+    if (pointCount == 0) {
+        std::cerr << "No points were loaded in the first pass!" << std::endl;
+        return {};
+    }
+
+    glm::vec3 center = (minPoint + maxPoint) * 0.5f;
+    file.clear();
+    file.seekg(0);
+    file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    std::vector<glm::vec3> points;
+    pointCount = 0;
+    while (std::getline(file, line) && (maxPoints < 0 || pointCount < maxPoints)) {
+        std::stringstream ss(line);
+        std::string xStr, yStr, zStr;
+
+        if (std::getline(ss, xStr, ',') && std::getline(ss, yStr, ',') && std::getline(ss, zStr, ',')) {
+            float x = std::stof(xStr);
+            float y = std::stof(yStr);
+            float z = std::stof(zStr);
+
+            points.emplace_back(x - center.x, z - center.z, y - center.y); // Swap y/z for convenience
             pointCount++;
         }
         else {
             std::cerr << "Error parsing line: " << line << std::endl;
         }
     }
+
     std::cout << "number of points: " << pointCount << std::endl;
+    /*std::cout << "bounding box min: (" << minPoint.x << ", " << minPoint.y << ", " << minPoint.z << ")" << std::endl;
+    std::cout << "bounding box max: (" << maxPoint.x << ", " << maxPoint.y << ", " << maxPoint.z << ")" << std::endl;
+    std::cout << "center: (" << center.x << ", " << center.y << ", " << center.z << ")" << std::endl;*/
 
     return points;
 }
+
 
 std::vector<glm::vec3> HeightMapHandler::getHeightMapVector()
 {
@@ -112,23 +158,19 @@ std::vector<unsigned int> HeightMapHandler::getTriangulationIndices()
     return indices;
 }
 
-glm::vec3 HeightMapHandler::getClosestNormal(float x, float z) const {
+glm::vec3 HeightMapHandler::getClosestNormal(float x, float z, glm::vec3 scale) const {
     if (heightMapPoints.empty() || indices.empty()) {
         throw std::runtime_error("Height map points or indices are not initialized.");
     }
 
-    glm::vec3 position(x, 0.0f, z); // Project position onto XZ-plane
+    glm::vec3 position(x, 0.0f, z);
 
-    // Loop through triangles in the height map (indices are in groups of 3)
     for (size_t i = 0; i < indices.size(); i += 3) {
-        // Get the vertices of the current triangle
         glm::vec3 v0 = heightMapPoints[indices[i]];
         glm::vec3 v1 = heightMapPoints[indices[i + 1]];
         glm::vec3 v2 = heightMapPoints[indices[i + 2]];
 
-        // Check if the point lies inside the triangle using barycentric coordinates
         if (isPointInTriangle(position, v0, v1, v2)) {
-            // Compute the normal for the triangle
             glm::vec3 edge1 = v1 - v0;
             glm::vec3 edge2 = v2 - v0;
             glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
@@ -136,7 +178,7 @@ glm::vec3 HeightMapHandler::getClosestNormal(float x, float z) const {
         }
     }
 
-    // Fallback: If no triangle was found, return the default normal (or handle differently)
+    // Fallback: If no triangle was found, return the default normal
     return glm::vec3(0.0f, 1.0f, 0.0f);
 }
 
@@ -145,81 +187,69 @@ bool HeightMapHandler::isPointInTriangle(const glm::vec3& p, const glm::vec3& v0
     glm::vec3 v0v2 = v2 - v0;
     glm::vec3 v0p = p - v0;
 
-    float dot00 = glm::dot(v0v1, v0v1);
-    float dot01 = glm::dot(v0v1, v0v2);
-    float dot02 = glm::dot(v0v1, v0p);
-    float dot11 = glm::dot(v0v2, v0v2);
-    float dot12 = glm::dot(v0v2, v0p);
+    double dot00 = glm::dot(v0v1, v0v1);
+    double dot01 = glm::dot(v0v1, v0v2);
+    double dot02 = glm::dot(v0v1, v0p);
+    double dot11 = glm::dot(v0v2, v0v2);
+    double dot12 = glm::dot(v0v2, v0p);
 
-    float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-    float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-    float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+    double invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+    double u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    double v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
-    // Check if the point is inside the triangle (barycentric coordinates must be between 0 and 1)
     return (u >= 0.0f && v >= 0.0f && u + v <= 1.0f);
 }
 
 float HeightMapHandler::getHeightAt(float x, float z) const {
-    if (heightMapPoints.empty()) {
-        throw std::runtime_error("Height map is empty.");
+    if (heightMapPoints.empty() || indices.empty()) {
+        throw std::runtime_error("Height map data or triangulation indices are missing.");
     }
 
-    float adjustedX = x;
-    float adjustedZ = z;
+    glm::vec3 p(x, 0.0f, z); // The query point (height is irrelevant for this)
 
-    int gridX = static_cast<int>(std::floor(adjustedX));
-    int gridZ = static_cast<int>(std::floor(adjustedZ));
+    // Iterate through the triangulation indices to find the triangle containing the point
+    for (size_t i = 0; i < indices.size(); i += 3) {
+        const glm::vec3& v0 = heightMapPoints[indices[i]];
+        const glm::vec3& v1 = heightMapPoints[indices[i + 1]];
+        const glm::vec3& v2 = heightMapPoints[indices[i + 2]];
 
-    glm::vec3 h00, h10, h01, h11;
-    bool foundH00 = false, foundH10 = false, foundH01 = false, foundH11 = false;
+        if (isPointInTriangle(p, v0, v1, v2)) {
+            // Calculate barycentric coordinates for the point within the triangle
+            glm::vec3 v0v1 = v1 - v0;
+            glm::vec3 v0v2 = v2 - v0;
+            glm::vec3 v0p = p - v0;
+
+            float dot00 = glm::dot(v0v2, v0v2);
+            float dot01 = glm::dot(v0v2, v0v1);
+            float dot02 = glm::dot(v0v2, v0p);
+            float dot11 = glm::dot(v0v1, v0v1);
+            float dot12 = glm::dot(v0v1, v0p);
+
+            float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+            float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+            float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+            float w = 1.0f - u - v;
+
+            // Use barycentric interpolation to calculate the height
+            return u * v1.y + v * v2.y + w * v0.y;
+        }
+    }
+
+    // If no triangle is found, fallback to nearest neighbor height
+    float nearestHeight = heightMapPoints[0].y;
+    float nearestDistanceSq = std::numeric_limits<float>::max();
 
     for (const auto& point : heightMapPoints) {
-        if (!foundH00 && static_cast<int>(point.x) == gridX && static_cast<int>(point.z) == gridZ) {
-            h00 = point;
-            foundH00 = true;
-        }
-        if (!foundH10 && static_cast<int>(point.x) == gridX + 1 && static_cast<int>(point.z) == gridZ) {
-            h10 = point;
-            foundH10 = true;
-        }
-        if (!foundH01 && static_cast<int>(point.x) == gridX && static_cast<int>(point.z) == gridZ + 1) {
-            h01 = point;
-            foundH01 = true;
-        }
-        if (!foundH11 && static_cast<int>(point.x) == gridX + 1 && static_cast<int>(point.z) == gridZ + 1) {
-            h11 = point;
-            foundH11 = true;
-        }
+        float dx = point.x - x;
+        float dz = point.z - z;
+        float distanceSq = dx * dx + dz * dz;
 
-        if (foundH00 && foundH10 && foundH01 && foundH11) {
-            break;
+        if (distanceSq < nearestDistanceSq) {
+            nearestHeight = point.y;
+            nearestDistanceSq = distanceSq;
         }
     }
 
-    if (!foundH00 || !foundH10 || !foundH01 || !foundH11) {
-        // Fallback: Find nearest height point
-        float nearestHeight = heightMapPoints[0].y;
-        float nearestDistanceSq = std::numeric_limits<float>::max();
-
-        for (const auto& point : heightMapPoints) {
-            float dx = point.x - adjustedX;
-            float dz = point.z - adjustedZ;
-            float distanceSq = dx * dx + dz * dz;
-
-            if (distanceSq < nearestDistanceSq) {
-                nearestHeight = point.y;
-                nearestDistanceSq = distanceSq;
-            }
-        }
-
-        return nearestHeight; // Return the height of the nearest point
-    }
-
-    float tx = adjustedX - gridX;
-    float tz = adjustedZ - gridZ;
-
-    float h0 = glm::mix(h00.y, h10.y, tx);
-    float h1 = glm::mix(h01.y, h11.y, tx);
-
-    return glm::mix(h0, h1, tz);
+    return nearestHeight;
 }
+

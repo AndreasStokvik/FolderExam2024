@@ -24,7 +24,7 @@ public:
 
     void update(float deltaTime);
 
-    glm::vec3 getSurfaceNormal(const glm::vec3& position);
+    glm::vec3 getSurfaceNormal(const glm::vec3& position, const glm::vec3& scale);
 
 private:
     EntityManager& entityManager;

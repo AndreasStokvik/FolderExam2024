@@ -15,9 +15,9 @@ void GameManager::init() {
     entityFactory = std::make_shared<EntityFactory>(entityManager, transformManager, renderManager, velocityManager, inputManagerComponent, colliderManager, triangleSurfaceManager, pointCloudManager, heightMapManager);
     
     int player = entityFactory->createPlayer(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f), glm::vec3(1.0f));
-    int surface = entityFactory->createSurface("external_files/HeightMap.txt", 100000, glm::vec3(1.0f));
-    int sphere = entityFactory->createSphere(glm::vec3(50.0f, 50.0f, 50.0f), 1.0f, glm::vec3(1.0f));
-    //int pointCloud = entityFactory->createPointCloud("external_files/HeightMap.txt", -1, glm::vec3(1.0f));
+    int surface = entityFactory->createSurface("external_files/Map1.txt", 100000, glm::vec3(1.0f));
+    int sphere = entityFactory->createSphere(glm::vec3(-15.0f, 10.0f, -10.0f), 1.0f, glm::vec3(1.0f));
+    //int pointCloud = entityFactory->createPointCloud("external_files/testHeightMap1.txt", -1, glm::vec3(1.0f));
     //  --------------------------------------------------------------------------------------------------------------------------------------------------------
 
     shader = std::make_shared<Shader>("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl", camera);
@@ -89,6 +89,7 @@ void GameManager::render() {
             if (triangleSurfaceManager.hasComponent(entity)) {
                 TriangleSurfaceMeshComponent& meshComp = triangleSurfaceManager.getComponent(entity);
                 shader->setUniform("pointColor", glm::vec3(0.0f, 1.0f, 0.0f));
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
                 renderHandler->drawTriangleMesh(meshComp.vertices, meshComp.indices, meshComp.normals, shader);
             }
 

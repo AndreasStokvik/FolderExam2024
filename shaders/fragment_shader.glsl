@@ -39,6 +39,8 @@ void main() {
         FragColor = texture(textureSampler, TexCoords) * vec4(lighting, 1.0);
     } else {
         // Render using only the lighting calculation if no texture is present
+        //FragColor = vec4(0.7 * norm * -FragPos + pointColor * lighting * -FragPos, 1.0);
         FragColor = vec4(pointColor * lighting, 1.0);
+        //FragColor = vec4(pointColor + lighting, 1.0);
     }
 }
