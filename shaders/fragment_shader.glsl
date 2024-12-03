@@ -40,7 +40,7 @@ void main() {
     } else {
         // Render using only the lighting calculation if no texture is present
         
-        //FragColor = vec4(pointColor + lighting, 1.0);                     // for point cloud
-        FragColor = vec4(10 * norm + pointColor + lighting, 1.0);         // for triangulated
+        FragColor = vec4(pointColor + lighting, 1.0);                     // for point cloud
+        //FragColor = vec4(10 * norm + pointColor + lighting, 1.0);         // for triangulated
     }
 }
