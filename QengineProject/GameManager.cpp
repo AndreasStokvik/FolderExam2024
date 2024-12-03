@@ -14,7 +14,7 @@ void GameManager::init() {
     // Entity creation  ----------------------------------------------------------------------------------------------------------------------------------------
     entityFactory = std::make_shared<EntityFactory>(entityManager, transformManager, renderManager, velocityManager, inputManagerComponent, colliderManager, triangleSurfaceManager, pointCloudManager, heightMapManager, renderHandler);
     
-    int player = entityFactory->createPlayer(glm::vec3(000.0f, 0.0f, 000.0f), glm::vec3(1.0f), glm::vec3(1.0f));
+    int player = entityFactory->createPlayer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f));
     int triangleSurface = entityFactory->createSurface("external_files/Map1.txt", -1, 1000, 1.0f);
     //int pointCloud = entityFactory->createPointCloud("external_files/Map1.txt", -1, 0, 1.0f);
     //int sphere = entityFactory->createSphere(glm::vec3(0.0f, 0.0f, 0.0f), 0.5f, glm::vec3(1.0f));
