@@ -12,16 +12,17 @@
 
 class InputSystem {
 public:
-    InputSystem(EntityManager& entityManager,
+    InputSystem(float movementSpeed, EntityManager& entityManager,
         ComponentManager<InputComponent>& inputComponents,
         ComponentManager<VelocityComponent>& velocityComponents,
         std::shared_ptr<InputManager> inputManagerInstance,
         ComponentManager<TransformComponent>& transformComponents)
-        : entityManager(entityManager),
+        : desiredSpeed(movementSpeed),
+        entityManager(entityManager),
         inputComponents(inputComponents),
         velocityComponents(velocityComponents),
         inputManagerInstance(std::move(inputManagerInstance)),
-        transformComponents(transformComponents) {}
+        transformComponents(transformComponents){}
 
     void update(const std::shared_ptr<Window>& window, float deltaTime) {
     for (int entity : entityManager.getEntities()) {

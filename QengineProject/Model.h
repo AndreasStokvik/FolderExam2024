@@ -26,6 +26,7 @@ class Model {
 public:
     Model(const std::string& path);
     Model() = default;
+    ~Model();
 
     void loadModel(const std::string& path);
     void setMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
@@ -34,6 +35,7 @@ public:
 
     void createSphere(float radius, unsigned int sectorCount, unsigned int stackCount);
 
+    const unsigned int getVAO() const { return VAO; }
     const std::vector<Vertex>& getVertices() const { return vertices; }
     const std::vector<unsigned int>& getIndices() const { return indices; }
     const std::vector<unsigned int>& getTextures() const { return textures; }
@@ -41,6 +43,9 @@ private:
     void processNode(aiNode* node, const aiScene* scene);
 
     void processMesh(aiMesh* mesh, const aiScene* scene);
+
+    unsigned int VAO, VBO, EBO;
+    void setupMesh();
 
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;

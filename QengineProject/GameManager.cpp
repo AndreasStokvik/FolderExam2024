@@ -8,16 +8,16 @@ void GameManager::init() {
     camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
     window = std::make_shared<Window>(1280, 720, "OpenGL Window", camera);
     inputManager = std::make_shared<InputManager>(window, camera, inputManagerComponent, entityManager, transformManager, *this);
-    inputSystem = std::make_shared<InputSystem>(entityManager, inputManagerComponent, velocityManager, inputManager, transformManager);
+    inputSystem = std::make_shared<InputSystem>(256.0f, entityManager, inputManagerComponent, velocityManager, inputManager, transformManager);
     renderHandler = std::make_shared<RenderHandler>();
 
     // Entity creation  ----------------------------------------------------------------------------------------------------------------------------------------
-    entityFactory = std::make_shared<EntityFactory>(entityManager, transformManager, renderManager, velocityManager, inputManagerComponent, colliderManager, triangleSurfaceManager, pointCloudManager, heightMapManager);
+    entityFactory = std::make_shared<EntityFactory>(entityManager, transformManager, renderManager, velocityManager, inputManagerComponent, colliderManager, triangleSurfaceManager, pointCloudManager, heightMapManager, renderHandler);
     
-    int player = entityFactory->createPlayer(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f), glm::vec3(1.0f));
-    int surface = entityFactory->createSurface("external_files/Map1.txt", 100000, glm::vec3(1.0f));
-    int sphere = entityFactory->createSphere(glm::vec3(-15.0f, 10.0f, -10.0f), 1.0f, glm::vec3(1.0f));
-    //int pointCloud = entityFactory->createPointCloud("external_files/testHeightMap1.txt", -1, glm::vec3(1.0f));
+    int player = entityFactory->createPlayer(glm::vec3(000.0f, 0.0f, 000.0f), glm::vec3(1.0f), glm::vec3(1.0f));
+    int triangleSurface = entityFactory->createSurface("external_files/Map1.txt", -1, 1000, 1.0f);
+    //int pointCloud = entityFactory->createPointCloud("external_files/Map1.txt", -1, 0, 1.0f);
+    //int sphere = entityFactory->createSphere(glm::vec3(0.0f, 0.0f, 0.0f), 0.5f, glm::vec3(1.0f));
     //  --------------------------------------------------------------------------------------------------------------------------------------------------------
 
     shader = std::make_shared<Shader>("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl", camera);
@@ -76,7 +76,8 @@ void GameManager::render() {
             transform->update(transformComp, shader);
 
             if (renderManager.hasComponent(entity)) {
-                RenderComponent& renderComp = renderManager.getComponent(entity);  
+                shader->setUniform("pointColor", glm::vec3(1.0f, 0.0f, 0.0f));
+                RenderComponent& renderComp = renderManager.getComponent(entity);
                 renderHandler->draw(*renderComp.model, shader, false);
             }
 
@@ -89,7 +90,7 @@ void GameManager::render() {
             if (triangleSurfaceManager.hasComponent(entity)) {
                 TriangleSurfaceMeshComponent& meshComp = triangleSurfaceManager.getComponent(entity);
                 shader->setUniform("pointColor", glm::vec3(0.0f, 1.0f, 0.0f));
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);              // Wireframe for debug
                 renderHandler->drawTriangleMesh(meshComp.vertices, meshComp.indices, meshComp.normals, shader);
             }
 
@@ -116,6 +117,6 @@ void GameManager::shutdown() {
 
 void GameManager::processInput() {
     if (!ImGui::GetIO().WantCaptureKeyboard) {
-        inputManager->processInput(window, camera);
+        inputManager->processInput(window, camera, entityFactory);
     }
 }

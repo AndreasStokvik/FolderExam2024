@@ -15,7 +15,7 @@ typedef K::Point_2 Point2D;
 class HeightMapHandler
 {
 public:
-	HeightMapHandler(const std::string& filePath, int maxPoints = -1);
+	HeightMapHandler(const std::string& filePath, int maxPoints = -1, int skip = 1, float scale = 1.0f);
 
     std::vector<glm::vec3> getHeightMapVector();
     std::vector<glm::vec3> getNormals();
@@ -24,12 +24,12 @@ public:
     std::vector<unsigned int> getTriangulationIndices();
     glm::vec3 getClosestNormal(float x, float z, glm::vec3 scale) const;
     bool isPointInTriangle(const glm::vec3& p, const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2) const;
-    float getHeightAt(float x, float z) const;
+    float getHeightAt(float x, float y, float z) const;
 private:
+    float transformScale;
     std::vector<glm::vec3> heightMapPoints;
     std::vector<glm::vec3> normals;
     std::vector<unsigned int> indices;
 
-    std::vector<glm::vec3> loadPointsFromFile(const std::string& filePath, int maxPoints);
+    std::vector<glm::vec3> loadPointsFromFile(const std::string& filePath, int maxPoints, int skip);
 };
-

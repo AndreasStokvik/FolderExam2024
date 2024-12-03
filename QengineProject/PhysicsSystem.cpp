@@ -15,31 +15,32 @@ void PhysicsSystem::update(float deltaTime)
 
                 if (colliderComp.type == ColliderType::SPHERE) {
                     glm::vec3 normal = getSurfaceNormal(transformComp.position, transformComp.scale);
+                    if (glm::length(normal) == 0.0f) continue;
                     glm::vec3 gravity = glm::vec3(0.0f, -9.81f, 0.0f);
+                    gravity *= 10;
                     glm::vec3 normalComponent = glm::dot(gravity, normal) * normal;
                     glm::vec3 gravityOnSurface = gravity - normalComponent;
 
                     totalForce += glm::vec3(gravityOnSurface.x, 0.0f, gravityOnSurface.z);
 
                     // Ensure the ball stays on the surface
-                    float surfaceHeight = heightMapManager->getHeightAt(transformComp.position.x, transformComp.position.z);
-                    transformComp.position.y = glm::max(transformComp.position.y, surfaceHeight);
+                    float surfaceHeight = heightMapManager->getHeightAt(transformComp.position.x, transformComp.position.y, transformComp.position.z);
+                    //transformComp.position.y = surfaceHeight + (colliderComp.dimensions.y * 0.5) + 0.03 * (transformComp.position.x - transformComp.position.z);
+                    transformComp.position.y = surfaceHeight + transformComp.scale.y/2;
+                    //std::cout << "ball pos: " << transformComp.position.y << std::endl << std::endl;
 
                     // Calculate acceleration from force
                     glm::vec3 acceleration = totalForce / velocityComp.mass;
 
                     // Update velocity with acceleration
-                    velocityComp.velocity += acceleration * deltaTime;
+                    velocityComp.velocity += acceleration * (deltaTime);
 
                     // Apply friction
-                    float avgFriction = 0.01f; // Coefficient of dynamic friction
-                    glm::vec3 horizontalVelocity = glm::vec3(velocityComp.velocity.x, 0.0f, velocityComp.velocity.z);
-                    float velocityMagnitude = glm::length(horizontalVelocity);
+                    float avgFriction = 0.9f; // Coefficient of dynamic friction
+                    float velocityMagnitude = glm::length(velocityComp.velocity);
 
                     if (velocityMagnitude > 0.01f && avgFriction > 0.0f) {
-                        // Friction force = -mu * normal force * velocity direction
-                        glm::vec3 gravity = glm::vec3(0.0f, -9.81f, 0.0f); // Assume constant gravity for now
-                        glm::vec3 frictionForce = -avgFriction * glm::length(gravityOnSurface) * glm::normalize(horizontalVelocity);
+                        glm::vec3 frictionForce = -avgFriction * glm::length(gravityOnSurface) * glm::normalize(velocityComp.velocity);
 
                         // Apply friction force to velocity
                         glm::vec3 velocityDelta = frictionForce * deltaTime;
@@ -53,7 +54,6 @@ void PhysicsSystem::update(float deltaTime)
                     }
                 }
             }
-            // Update position with velocity
             transformComp.position += velocityComp.velocity * deltaTime;
         }
     }

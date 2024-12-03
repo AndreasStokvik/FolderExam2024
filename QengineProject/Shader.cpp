@@ -47,7 +47,7 @@ void Shader::setUniform(const std::string& name, const glm::mat4& matrix) {glUni
 void Shader::setUniform(const std::string& name, const glm::vec3& vector) {
     int location = glGetUniformLocation(programID, name.c_str());
     if (location == -1) {
-        std::cerr << "Warning: uniform '" << name << "' not found or not used in the shader program!" << std::endl;
+        //std::cerr << "Warning: uniform '" << name << "' not found or not used in the shader program!" << std::endl;
     }
     glUniform3fv(location, 1, glm::value_ptr(vector));
 }

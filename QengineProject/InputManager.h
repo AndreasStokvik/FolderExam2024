@@ -9,6 +9,7 @@
 #include "EntityManager.h"
 #include "../../components/InputComponent.h"
 #include "../../components/TransformComponent.h"
+#include "EntityFactory.h"
 
 class GameManager;
 
@@ -26,11 +27,15 @@ private:
 
 class InputManager {
 public:
-    InputManager(const std::shared_ptr<Window>& window, const std::shared_ptr<Camera>& camera, 
-        ComponentManager<InputComponent>& inputManagerComponent, EntityManager& entityManager, 
-        ComponentManager<TransformComponent>&transformManager, GameManager& gameManager);
+    InputManager(
+        const std::shared_ptr<Window>& window, 
+        const std::shared_ptr<Camera>& camera, 
+        ComponentManager<InputComponent>& inputManagerComponent, 
+        EntityManager& entityManager, 
+        ComponentManager<TransformComponent>&transformManager, 
+        GameManager& gameManager);
 
-    void processInput(const std::shared_ptr<Window>& window, const std::shared_ptr<Camera>& camera);
+    void processInput(const std::shared_ptr<Window>& window, const std::shared_ptr<Camera>& camera, const std::shared_ptr<EntityFactory>& entityFactory);
     bool isKeyPressedOnce(const std::shared_ptr<Window>& window, int key);
     bool isKeyPressed(const std::shared_ptr<Window>& window, int key);
 

@@ -15,7 +15,7 @@ uniform vec3 pointColor;            // Uniform color for point rendering
 
 void main() {
     // Ambient lighting
-    float ambientStrength = 0.4;
+    float ambientStrength = 0.2;
     vec3 ambient = ambientStrength * lightColor;
 
     // Diffuse lighting
@@ -39,8 +39,8 @@ void main() {
         FragColor = texture(textureSampler, TexCoords) * vec4(lighting, 1.0);
     } else {
         // Render using only the lighting calculation if no texture is present
-        //FragColor = vec4(0.7 * norm * -FragPos + pointColor * lighting * -FragPos, 1.0);
-        FragColor = vec4(pointColor * lighting, 1.0);
-        //FragColor = vec4(pointColor + lighting, 1.0);
+        
+        //FragColor = vec4(pointColor + lighting, 1.0);                     // for point cloud
+        FragColor = vec4(10 * norm + pointColor + lighting, 1.0);         // for triangulated
     }
 }

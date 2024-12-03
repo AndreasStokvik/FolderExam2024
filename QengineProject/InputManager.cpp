@@ -9,16 +9,23 @@ struct InputCameraContext {
 
 std::unique_ptr<Timer> timer = std::make_unique<Timer>();
 
-InputManager::InputManager(const std::shared_ptr<Window>& window, const std::shared_ptr<Camera>& camera, 
-    ComponentManager<InputComponent>& inputManagerComponent, EntityManager& entityManager,
-    ComponentManager<TransformComponent>& transformManager, GameManager& gameManager)
-    : lastX(400), lastY(300), firstMouse(true), inputManagerComponent(inputManagerComponent),
-    entityManager(entityManager), transformManager(transformManager), gameManager(gameManager) {
+InputManager::InputManager(
+    const std::shared_ptr<Window>& window, 
+    const std::shared_ptr<Camera>& camera, 
+    ComponentManager<InputComponent>& inputManagerComponent, 
+    EntityManager& entityManager,
+    ComponentManager<TransformComponent>& transformManager, 
+    GameManager& gameManager)
+    : lastX(400), lastY(300), firstMouse(true), 
+    inputManagerComponent(inputManagerComponent),
+    entityManager(entityManager), 
+    transformManager(transformManager), 
+    gameManager(gameManager){
     keyStates.fill(false);
     setMouseCallback(window, camera);
 }
 
-void InputManager::processInput(const std::shared_ptr <Window>& window, const std::shared_ptr<Camera>& camera) {
+void InputManager::processInput(const std::shared_ptr <Window>& window, const std::shared_ptr<Camera>& camera, const std::shared_ptr<EntityFactory>& entityFactory) {
     float deltaTime = timer->getDeltaTime();
     // Movement keys (Arrow keys, Space, Shift)
     if (isKeyPressed(window, GLFW_KEY_UP))
@@ -33,6 +40,9 @@ void InputManager::processInput(const std::shared_ptr <Window>& window, const st
         camera->processKeyboard(UP, deltaTime);
     if (isKeyPressed(window, GLFW_KEY_LEFT_SHIFT))
         camera->processKeyboard(DOWN, deltaTime);
+
+    if (isKeyPressed(window, GLFW_KEY_E))
+        entityFactory->createSphere(camera->getPosition(), 0.5f, glm::vec3(1.0f));
 
     // Toggle cursor and camera movement with Escape key
     if (isKeyPressedOnce(window, GLFW_KEY_ESCAPE)) {

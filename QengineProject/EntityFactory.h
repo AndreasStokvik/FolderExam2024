@@ -1,3 +1,6 @@
+#ifndef ENTITY_FACTORY_H
+#define ENTITY_FACTORY_H
+
 // Components
 #include "../../components/RenderComponent.h"
 #include "../../components/TransformComponent.h"
@@ -8,6 +11,7 @@
 #include "../../components/TriangleSurfaceMeshComponent.h"
 
 #include "HeightMapHandler.h"
+#include "RenderHandler.h"
 #include "EntityManager.h"
 #include "ComponentManager.h"
 
@@ -22,7 +26,8 @@ public:
         ComponentManager<ColliderComponent>& colliderManager,
         ComponentManager<TriangleSurfaceMeshComponent>& triangleSurfaceManager,
         ComponentManager<PointCloudComponent>& pointCloudManager,
-        std::shared_ptr<HeightMapHandler>& heightMapManager)
+        std::shared_ptr<HeightMapHandler>& heightMapManager, 
+        std::shared_ptr<RenderHandler>& renderHandler)
         : entityManager(entityManager),
         transformManager(transformManager),
         renderManager(renderManager),
@@ -31,13 +36,13 @@ public:
         colliderManager(colliderManager),
         triangleSurfaceManager(triangleSurfaceManager),
         pointCloudManager(pointCloudManager),
-        heightMapManager(heightMapManager) {
-    }
+        heightMapManager(heightMapManager),
+        renderHandler(renderHandler){}
 
     int createPlayer(const glm::vec3& position, const glm::vec3& scale, const glm::vec3& velocity);
     int createSphere(const glm::vec3& position, float radius, const glm::vec3& scale);
-    int createSurface(const std::string& heightMapFile, int resolution, const glm::vec3& scale);
-    int createPointCloud(const std::string& heightMapFile, int resolution, const glm::vec3& scale);
+    int createSurface(const std::string& heightMapFile, int resolution, int skip, const float scale);
+    int createPointCloud(const std::string& heightMapFile, int resolution, int skip, const float scale);
 
 private:
     EntityManager& entityManager;
@@ -49,4 +54,7 @@ private:
     ComponentManager<TriangleSurfaceMeshComponent>& triangleSurfaceManager;
     ComponentManager<PointCloudComponent>& pointCloudManager;
     std::shared_ptr<HeightMapHandler>& heightMapManager;
+    std::shared_ptr<RenderHandler>& renderHandler;
 };
+
+#endif 
