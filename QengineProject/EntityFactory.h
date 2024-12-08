@@ -48,7 +48,7 @@ public:
     int createSphere(const glm::vec3& position, float radius, const glm::vec3& scale);
     int createSurface(const std::string& heightMapFile, int resolution, int skip, const float scale);
     int createPointCloud(const std::string& heightMapFile, int resolution, int skip, const float scale);
-    int createParticleEntity(const glm::vec3& position, float radius, size_t particleCount, float particleTimeDelta);
+    int createParticleEntity(const glm::vec3& position, float radius, size_t particleCount);
 
 private:
     EntityManager& entityManager;

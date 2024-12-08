@@ -10,7 +10,6 @@ void GameManager::init() {
     inputManager = std::make_shared<InputManager>(window, camera, inputManagerComponent, entityManager, transformManager, *this);
     inputSystem = std::make_shared<InputSystem>(256.0f, entityManager, inputManagerComponent, velocityManager, inputManager, transformManager);
     renderHandler = std::make_shared<RenderHandler>();
-    particleSystem = std::make_shared<ParticleSystem>(-9.81f);
 
     // Entity creation  ----------------------------------------------------------------------------------------------------------------------------------------
     entityFactory = std::make_shared<EntityFactory>(
@@ -21,7 +20,9 @@ void GameManager::init() {
     
     int player = entityFactory->createPlayer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f));
     int triangleSurface = entityFactory->createSurface("external_files/testMap1.txt", -1, 0, 1.0f);
-    int particleEntity = entityFactory->createParticleEntity(glm::vec3(0.0f), 25.0f, 100000, 0.1f);
+    int particleEntity = entityFactory->createParticleEntity(glm::vec3(0.0f, 0.0f, 0.0f), 25.0f, 100000);
+    int particleEntity1 = entityFactory->createParticleEntity(glm::vec3(50.0f, 0.0f, 25.0f), 25.0f, 100000);
+    int particleEntity2 = entityFactory->createParticleEntity(glm::vec3(25.0f, 0.0f, 50.0f), 25.0f, 100000);
     //  --------------------------------------------------------------------------------------------------------------------------------------------------------
 
     shader = std::make_shared<Shader>("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl", camera);
@@ -32,6 +33,7 @@ void GameManager::init() {
     camera->setProjectionUniform(shader);
     transform->setViewUniform(shader);
     shader->setLightingUniforms(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(50.0f, 50.0f, 0.0f), camera->getPosition());
+    particleSystem = std::make_shared<ParticleSystem>(-9.81f / 4);
     physicsSystem = std::make_shared<PhysicsSystem>(entityManager, transformManager, velocityManager, colliderManager, heightMapManager);
 }
 
@@ -59,10 +61,11 @@ void GameManager::update() {
         if (transformManager.hasComponent(entity)) {
             TransformComponent& transformComp = transformManager.getComponent(entity);
             transform->update(transformComp, shader);
-        }
-        if (particleManager.hasComponent(entity)) {
-            ParticleComponent& particleComp = particleManager.getComponent(entity);
-            particleSystem->updateParticles(particleComp, deltaTime);
+
+            if (particleManager.hasComponent(entity)) {
+                ParticleComponent& particleComp = particleManager.getComponent(entity);
+                particleSystem->updateParticles(particleComp, transformComp, deltaTime);
+            }
         }
         if (inputManagerComponent.hasComponent(entity)) {
             TransformComponent& transformComp = transformManager.getComponent(entity);
@@ -92,7 +95,7 @@ void GameManager::render() {
 
             if (particleManager.hasComponent(entity)) {
                 ParticleComponent& particleComp = particleManager.getComponent(entity);
-                shader->setUniform("pointColor", glm::vec3(0.0f, 0.0f, 1.0f)); // Blue particles, for example
+                shader->setUniform("pointColor", glm::vec3(1.0f)); // Blue particles, for example
                 shader->setUniform("pointSize", 2.0f); // Larger size for particles
                 renderHandler->drawPointCloud(particleComp.positions, shader);
             }

@@ -52,9 +52,9 @@ int EntityFactory::createPointCloud(const std::string& heightMapFile, int resolu
     return surface;
 }
 
-int EntityFactory::createParticleEntity(const glm::vec3& position, float radius, size_t particleCount, float particleTimeDelta) {
+int EntityFactory::createParticleEntity(const glm::vec3& position, float radius, size_t particleCount) {
     int particleEntity = entityManager.createEntity();
-    transformManager.addComponent(particleEntity, TransformComponent(position, glm::vec3(0.0f), glm::vec3(radius * 2)));
-    particleManager.addComponent(particleEntity, ParticleComponent(radius, particleCount, particleTimeDelta));
+    particleManager.addComponent(particleEntity, ParticleComponent(radius, particleCount));
+    transformManager.addComponent(particleEntity, TransformComponent(position, glm::vec3(0.0f), glm::vec3(1.0f)));
     return particleEntity;
 }
