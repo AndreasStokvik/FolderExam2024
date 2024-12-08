@@ -48,6 +48,13 @@ int EntityFactory::createPointCloud(const std::string& heightMapFile, int resolu
     int surface = entityManager.createEntity();
     heightMapManager = std::make_shared<HeightMapHandler>(heightMapFile, resolution, skip, scale);
     pointCloudManager.addComponent(surface, PointCloudComponent(heightMapManager->getHeightMapVector()));
-    transformManager.addComponent(surface, TransformComponent(glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(scale)));
+    transformManager.addComponent(surface, TransformComponent(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(scale)));
     return surface;
+}
+
+int EntityFactory::createParticleEntity(const glm::vec3& position, float radius, size_t particleCount, float particleTimeDelta) {
+    int particleEntity = entityManager.createEntity();
+    transformManager.addComponent(particleEntity, TransformComponent(position, glm::vec3(0.0f), glm::vec3(radius * 2)));
+    particleManager.addComponent(particleEntity, ParticleComponent(radius, particleCount, particleTimeDelta));
+    return particleEntity;
 }

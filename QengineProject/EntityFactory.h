@@ -9,6 +9,7 @@
 #include "../../components/ColliderComponent.h"
 #include "../../components/PointCloudComponent.h"
 #include "../../components/TriangleSurfaceMeshComponent.h"
+#include "../../components/ParticleComponent.h"
 
 #include "HeightMapHandler.h"
 #include "RenderHandler.h"
@@ -27,7 +28,9 @@ public:
         ComponentManager<TriangleSurfaceMeshComponent>& triangleSurfaceManager,
         ComponentManager<PointCloudComponent>& pointCloudManager,
         std::shared_ptr<HeightMapHandler>& heightMapManager, 
-        std::shared_ptr<RenderHandler>& renderHandler)
+        std::shared_ptr<RenderHandler>& renderHandler,
+        ComponentManager<ParticleComponent>& particleManager
+    )
         : entityManager(entityManager),
         transformManager(transformManager),
         renderManager(renderManager),
@@ -37,12 +40,15 @@ public:
         triangleSurfaceManager(triangleSurfaceManager),
         pointCloudManager(pointCloudManager),
         heightMapManager(heightMapManager),
-        renderHandler(renderHandler){}
+        renderHandler(renderHandler),
+        particleManager(particleManager)
+    {}
 
     int createPlayer(const glm::vec3& position, const glm::vec3& scale, const glm::vec3& velocity);
     int createSphere(const glm::vec3& position, float radius, const glm::vec3& scale);
     int createSurface(const std::string& heightMapFile, int resolution, int skip, const float scale);
     int createPointCloud(const std::string& heightMapFile, int resolution, int skip, const float scale);
+    int createParticleEntity(const glm::vec3& position, float radius, size_t particleCount, float particleTimeDelta);
 
 private:
     EntityManager& entityManager;
@@ -55,6 +61,7 @@ private:
     ComponentManager<PointCloudComponent>& pointCloudManager;
     std::shared_ptr<HeightMapHandler>& heightMapManager;
     std::shared_ptr<RenderHandler>& renderHandler;
+    ComponentManager<ParticleComponent>& particleManager;
 };
 
 #endif 

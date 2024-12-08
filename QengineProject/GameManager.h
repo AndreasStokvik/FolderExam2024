@@ -20,6 +20,7 @@
 #include "CameraSystem.h"
 #include "RenderHandler.h"
 #include "HeightMapHandler.h"
+#include "ParticleSystem.h"
 
 // ECS
 #include "ComponentManager.h"
@@ -31,6 +32,7 @@
 #include "../../components/ColliderComponent.h"
 #include "../../components/PointCloudComponent.h"
 #include "../../components/TriangleSurfaceMeshComponent.h"
+#include "../../components/ParticleComponent.h"
 
 class InputManager;
 
@@ -73,9 +75,11 @@ private:
     ComponentManager<ColliderComponent> colliderManager;
     ComponentManager<PointCloudComponent> pointCloudManager;
     ComponentManager<TriangleSurfaceMeshComponent> triangleSurfaceManager;
+    ComponentManager<ParticleComponent> particleManager;
 
     std::shared_ptr<PhysicsSystem> physicsSystem;
     std::shared_ptr<InputSystem> inputSystem;
+    std::shared_ptr<ParticleSystem> particleSystem;
 
     float lastFrameTime = 0.0f;
 };

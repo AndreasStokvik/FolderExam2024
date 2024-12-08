@@ -94,7 +94,7 @@ std::vector<glm::vec3> HeightMapHandler::loadPointsFromFile(const std::string& f
         lineIndex++;
     }
 
-    std::cout << "Number of points: " << pointCount << std::endl;
+    //std::cout << "Number of points: " << pointCount << std::endl;
 
     return points;
 }
