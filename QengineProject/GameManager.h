@@ -34,6 +34,15 @@
 #include "../../components/TriangleSurfaceMeshComponent.h"
 #include "../../components/ParticleComponent.h"
 
+extern "C" {
+#include "lua54/include/lua.h"
+#include "lua54/include/lauxlib.h"
+#include "lua54/include/lualib.h"
+}
+#ifdef _WIN32
+#pragma comment(lib, "lua54/lua54.lib")
+#endif
+
 class InputManager;
 
 class GameManager {
@@ -65,6 +74,7 @@ private:
     std::shared_ptr<Model> model;
     std::shared_ptr<EntityFactory> entityFactory;
     std::shared_ptr<Shader> shader;
+    lua_State* luaState;
 
     // ECS
     EntityManager entityManager;

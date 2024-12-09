@@ -252,5 +252,6 @@
     </None>
     <None Include="..\shaders\flat_fragment_shader.glsl" />
     <None Include="..\shaders\flat_vertex_shader.glsl" />
+    <None Include="lua54.dll" />
   </ItemGroup>
 </Project>

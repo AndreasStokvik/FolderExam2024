@@ -235,6 +235,7 @@ copy "$(SolutionDir)\libs\assimp\lib\assimp-vc143-mt.dll" "$(OutDir)"</Command>
     <None Include="..\shaders\flat_vertex_shader.glsl" />
     <None Include="..\shaders\fragment_shader.glsl" />
     <None Include="..\shaders\vertex_shader.glsl" />
+    <None Include="lua54.dll" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
