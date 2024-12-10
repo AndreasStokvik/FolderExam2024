@@ -3,92 +3,81 @@
 #include "InputManager.h"
 
 void bindParticleComponentToLua(lua_State* L, ComponentManager<ParticleComponent>& particleManager, EntityManager& entityManager) {
-    lua_getglobal(L, "newSpawnRadius"); // Push the function onto the stack
+    lua_getglobal(L, "newSpawnRadius");
     if (!lua_isfunction(L, -1)) {
         std::cerr << "Function 'newSpawnRadius' not found" << std::endl;
-        lua_pop(L, 1); // Pop the invalid value off the stack
+        lua_pop(L, 1);
         return;
     }
 
     float oldRadius = 0.0f;
     int oldMaxCount = 0;
+    float oldGravity = -9.81f;
 
-    // Retrieve old values from one of the components
     for (int entity : entityManager.getEntities()) {
         if (particleManager.hasComponent(entity)) {
             ParticleComponent& particleComp = particleManager.getComponent(entity);
             oldRadius = particleComp.spawnRadius;
             oldMaxCount = particleComp.maxParticleCount;
-            break; // Only need one value
+            oldGravity = particleComp.gravity;
+            break;
         }
     }
 
-    std::cout << "Old Radius: " << oldRadius << ", Old Max Count: " << oldMaxCount << std::endl;
+    std::cout << "Old Radius: " << oldRadius << ", Old Max Count: " << oldMaxCount << ", Old Gravity: " << oldGravity << std::endl;
 
-    // Push the argument for newSpawnRadius
-    lua_pushnumber(L, oldRadius);
-
-    // Call the Lua function (1 argument, 1 result)
-    if (lua_pcall(L, 1, 1, 0) != LUA_OK) {
+    // Update spawnRadius
+    if (lua_pcall(L, 0, 1, 0) != LUA_OK) {
         std::cerr << "Error calling newSpawnRadius: " << lua_tostring(L, -1) << std::endl;
-        lua_pop(L, 1); // Remove the error message
+        lua_pop(L, 1);
         return;
     }
-
-    // Check if the return value is a number
-    float newRadius = oldRadius; // Default to old value in case of error
-    if (lua_isnumber(L, -1)) {
-        newRadius = static_cast<float>(lua_tonumber(L, -1));
-        std::cout << "New Radius: " << newRadius << std::endl;
-    }
-    else {
-        std::cerr << "newSpawnRadius did not return a number" << std::endl;
-    }
-
-    // Clean up the Lua stack
+    float newRadius = lua_isnumber(L, -1) ? static_cast<float>(lua_tonumber(L, -1)) : oldRadius;
     lua_pop(L, 1);
 
     // Update maxParticleCount
-    lua_getglobal(L, "newMaxParticleCount"); // Push the function onto the stack
+    lua_getglobal(L, "newMaxParticleCount");
     if (!lua_isfunction(L, -1)) {
         std::cerr << "Function 'newMaxParticleCount' not found" << std::endl;
-        lua_pop(L, 1); // Pop the invalid value off the stack
+        lua_pop(L, 1);
         return;
     }
-
-    // Push the argument for newMaxParticleCount
-    lua_pushnumber(L, oldMaxCount);
-
-    // Call the Lua function (1 argument, 1 result)
-    if (lua_pcall(L, 1, 1, 0) != LUA_OK) {
+    if (lua_pcall(L, 0, 1, 0) != LUA_OK) {
         std::cerr << "Error calling newMaxParticleCount: " << lua_tostring(L, -1) << std::endl;
-        lua_pop(L, 1); // Remove the error message
+        lua_pop(L, 1);
         return;
     }
-
-    // Check if the return value is a number
-    int newMaxCount = oldMaxCount; // Default to old value in case of error
-    if (lua_isnumber(L, -1)) {
-        newMaxCount = static_cast<int>(lua_tonumber(L, -1));
-        std::cout << "New Max Count: " << newMaxCount << std::endl;
-    }
-    else {
-        std::cerr << "newMaxParticleCount did not return a number" << std::endl;
-    }
-
-    // Clean up the Lua stack
+    int newMaxCount = lua_isnumber(L, -1) ? static_cast<int>(lua_tonumber(L, -1)) : oldMaxCount;
     lua_pop(L, 1);
 
-    // Update the components
+    // Update gravity
+    lua_getglobal(L, "newGravity");
+    if (!lua_isfunction(L, -1)) {
+        std::cerr << "Function 'newGravity' not found" << std::endl;
+        lua_pop(L, 1);
+        return;
+    }
+    if (lua_pcall(L, 0, 1, 0) != LUA_OK) {
+        std::cerr << "Error calling newGravity: " << lua_tostring(L, -1) << std::endl;
+        lua_pop(L, 1);
+        return;
+    }
+    float newGravity = lua_isnumber(L, -1) ? static_cast<float>(lua_tonumber(L, -1)) : oldGravity;
+    lua_pop(L, 1);
+
     for (int entity : entityManager.getEntities()) {
         if (particleManager.hasComponent(entity)) {
             ParticleComponent& particleComp = particleManager.getComponent(entity);
             particleComp.spawnRadius = newRadius;
             particleComp.maxParticleCount = newMaxCount;
+            particleComp.gravity = newGravity;
         }
     }
-}
 
+    std::cout << "Updated Radius: " << newRadius
+        << ", Updated Max Count: " << newMaxCount
+        << ", Updated Gravity: " << newGravity << std::endl;
+}
 
 void printLuaStack(lua_State* L) {
     int top = lua_gettop(L);
@@ -123,7 +112,6 @@ void GameManager::init() {
     luaState = luaL_newstate();
     luaL_openlibs(luaState);
 
-
     // Entity creation  ----------------------------------------------------------------------------------------------------------------------------------------
     entityFactory = std::make_shared<EntityFactory>(
         entityManager, transformManager, renderManager, 
@@ -132,21 +120,19 @@ void GameManager::init() {
         renderHandler, particleManager);
     
     int player = entityFactory->createPlayer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f));
-    int triangleSurface = entityFactory->createSurface("external_files/testMap1.txt", -1, 0, 1.0f);
+    //int triangleSurface = entityFactory->createSurface("external_files/testMap1.txt", -1, 0, 1.0f);
     int particleEntity = entityFactory->createParticleEntity(glm::vec3(0.0f, 0.0f, 0.0f), 25.0f, 100000);
+    int particleEntity1 = entityFactory->createParticleEntity(glm::vec3(25.0f, 0.0f, 0.0f), 25.0f, 100000);
+    int particleEntity2 = entityFactory->createParticleEntity(glm::vec3(0.0f, 0.0f, 25.0f), 25.0f, 100000);
     //  --------------------------------------------------------------------------------------------------------------------------------------------------------
-
     
-    const std::string& scriptPath = "config.lua";
-    
-    if (luaL_dofile(luaState, scriptPath.c_str()) != LUA_OK) {
+    if (luaL_dofile(luaState, "config.lua") != LUA_OK) {
         std::cerr << "Error loading Lua script: " << lua_tostring(luaState, -1) << std::endl;
     }
     else {
         bindParticleComponentToLua(luaState, particleManager, entityManager);
     }
     printLuaStack(luaState);
-
 
     shader = std::make_shared<Shader>("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl", camera);
     transform = std::make_shared<Transform>(camera, shader);
@@ -156,7 +142,7 @@ void GameManager::init() {
     camera->setProjectionUniform(shader);
     transform->setViewUniform(shader);
     shader->setLightingUniforms(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(50.0f, 50.0f, 0.0f), camera->getPosition());
-    particleSystem = std::make_shared<ParticleSystem>(-9.81f / 16);
+    particleSystem = std::make_shared<ParticleSystem>();
     physicsSystem = std::make_shared<PhysicsSystem>(entityManager, transformManager, velocityManager, colliderManager, heightMapManager);
 }
 
@@ -218,8 +204,8 @@ void GameManager::render() {
 
             if (particleManager.hasComponent(entity)) {
                 ParticleComponent& particleComp = particleManager.getComponent(entity);
-                shader->setUniform("pointColor", glm::vec3(1.0f)); // Blue particles, for example
-                shader->setUniform("pointSize", 2.0f); // Larger size for particles
+                shader->setUniform("pointColor", glm::vec3(1.0f));
+                shader->setUniform("pointSize", 2.0f);
                 renderHandler->drawPointCloud(particleComp.positions, shader);
             }
 
@@ -260,9 +246,7 @@ void GameManager::processInput() {
 
         bool keyPressed = glfwGetKey(window->getWindow(), GLFW_KEY_R) == GLFW_PRESS;
         if (keyPressed && !keyPressedLastFrame) {
-            const std::string& scriptPath = "config.lua";
-
-            if (luaL_dofile(luaState, scriptPath.c_str()) != LUA_OK) {
+            if (luaL_dofile(luaState, "config.lua") != LUA_OK) {
                 std::cerr << "Error loading Lua script: " << lua_tostring(luaState, -1) << std::endl;
             }
             else {

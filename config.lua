@@ -1,9 +1,11 @@
-function newSpawnRadius(radius)
-    radius = 10
-    return radius
+function newSpawnRadius()
+    return 10
 end
 
-function newMaxParticleCount(maxCount)
-    maxCount = 50000000
-    return maxCount
+function newMaxParticleCount()
+    return 1000000
+end
+
+function newGravity()
+    return -30/8
 end
