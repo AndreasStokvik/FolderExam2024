@@ -1,5 +1,5 @@
 function newSpawnRadius()
-    return 10
+    return 100
 end
 
 function newMaxParticleCount()

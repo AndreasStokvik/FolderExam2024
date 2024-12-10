@@ -99,6 +99,81 @@ void printLuaStack(lua_State* L) {
     }
 }
 
+class QuadtreeNode {
+public:
+    glm::vec3 position;
+    int entityId;
+
+    QuadtreeNode(const glm::vec3& pos, int id) : position(pos), entityId(id) {}
+};
+
+class Quadtree {
+private:
+    glm::vec2 position; // Bottom-left corner of the region
+    glm::vec2 size;     // Width and height of the region
+    int capacity;       // Max number of entities per node before subdivision
+    bool subdivided;
+
+    std::vector<std::shared_ptr<QuadtreeNode>> nodes;
+    std::vector<std::unique_ptr<Quadtree>> children;
+
+public:
+    Quadtree(const glm::vec2& pos, const glm::vec2& size, int cap = 4)
+        : position(pos), size(size), capacity(cap), subdivided(false) {
+    }
+
+    void insert(const std::shared_ptr<QuadtreeNode>& node) {
+        if (!contains(node->position)) return;
+
+        if (nodes.size() < capacity && !subdivided) {
+            nodes.push_back(node);
+        }
+        else {
+            if (!subdivided) subdivide();
+            for (auto& child : children) {
+                child->insert(node);
+            }
+        }
+    }
+
+    void query(const glm::vec2& queryPos, float range, std::vector<std::shared_ptr<QuadtreeNode>>& results) const {
+        if (!intersects(queryPos, range)) return;
+
+        for (const auto& node : nodes) {
+            glm::vec2 delta = glm::vec2(node->position.x, node->position.z) - queryPos;
+            if (glm::length(delta) <= range) {
+                results.push_back(node);
+            }
+        }
+
+        if (subdivided) {
+            for (const auto& child : children) {
+                child->query(queryPos, range, results);
+            }
+        }
+    }
+
+private:
+    bool contains(const glm::vec3& point) const {
+        return point.x >= position.x && point.x < position.x + size.x &&
+            point.z >= position.y && point.z < position.y + size.y;
+    }
+
+    bool intersects(const glm::vec2& queryPos, float range) const {
+        return queryPos.x + range >= position.x && queryPos.x - range <= position.x + size.x &&
+            queryPos.y + range >= position.y && queryPos.y - range <= position.y + size.y;
+    }
+
+    void subdivide() {
+        glm::vec2 halfSize = size / 2.0f;
+        children.push_back(std::make_unique<Quadtree>(position, halfSize));
+        children.push_back(std::make_unique<Quadtree>(position + glm::vec2(halfSize.x, 0.0f), halfSize));
+        children.push_back(std::make_unique<Quadtree>(position + glm::vec2(0.0f, halfSize.y), halfSize));
+        children.push_back(std::make_unique<Quadtree>(position + halfSize, halfSize));
+        subdivided = true;
+    }
+};
+
 bool checkSphereCollision(
     const TransformComponent& transformA, const ColliderComponent& colliderA,
     const TransformComponent& transformB, const ColliderComponent& colliderB)
@@ -170,6 +245,75 @@ void detectAndResolveCollisions(EntityManager& entityManager,
     }
 }
 
+void detectAndResolveCollisionsWithQuadtree(
+    EntityManager& entityManager,
+    ComponentManager<TransformComponent>& transformManager,
+    ComponentManager<ColliderComponent>& colliderManager,
+    ComponentManager<VelocityComponent>& velocityManager,
+    float deltaTime)
+{
+    // Bounds of the quadtree
+    Quadtree quadtree(glm::vec2(-50.0f, -50.0f), glm::vec2(100.0f, 100.0f));
+
+    // Inserting all entities with sphere colliders into the quadtree
+    for (int entity : entityManager.getEntities()) {
+        if (transformManager.hasComponent(entity) && colliderManager.hasComponent(entity)) {
+            TransformComponent& transform = transformManager.getComponent(entity);
+            ColliderComponent& collider = colliderManager.getComponent(entity);
+
+            if (collider.type == ColliderType::SPHERE) {
+                glm::vec3 worldPos = transform.position;
+                quadtree.insert(std::make_shared<QuadtreeNode>(worldPos, entity));
+            }
+        }
+    }
+
+    // Checking for collisions within relevant regions of the quadtree
+    for (int entity : entityManager.getEntities()) {
+        if (transformManager.hasComponent(entity) && colliderManager.hasComponent(entity)) {
+            TransformComponent& transformA = transformManager.getComponent(entity);
+            ColliderComponent& colliderA = colliderManager.getComponent(entity);
+
+            if (colliderA.type == ColliderType::SPHERE) {
+                glm::vec3 posA = transformA.position;
+                float radiusA = colliderA.dimensions.x / 2.0f;
+
+                std::vector<std::shared_ptr<QuadtreeNode>> nearbyNodes;
+                quadtree.query(glm::vec2(posA.x, posA.z), radiusA * 2, nearbyNodes);
+
+                for (const auto& node : nearbyNodes) {
+                    if (node->entityId != entity) {
+                        TransformComponent& transformB = transformManager.getComponent(node->entityId);
+                        ColliderComponent& colliderB = colliderManager.getComponent(node->entityId);
+
+                        if (checkSphereCollision(transformA, colliderA, transformB, colliderB)) {
+                            std::cout << "Collision detected between entities " << entity << " and " << node->entityId << std::endl;
+
+                            if (!colliderA.isStatic && !colliderB.isStatic) {
+                                if (velocityManager.hasComponent(entity) && velocityManager.hasComponent(node->entityId)) {
+                                    VelocityComponent& velA = velocityManager.getComponent(entity);
+                                    VelocityComponent& velB = velocityManager.getComponent(node->entityId);
+
+                                    glm::vec3 collisionNormal = glm::normalize(transformB.position - posA);
+                                    float relativeVelocity = glm::dot(velB.velocity - velA.velocity, collisionNormal);
+
+                                    if (relativeVelocity < 0) {
+                                        float restitution = 0.8f;
+                                        float impulse = (1 + restitution) * relativeVelocity / 2.0f;
+
+                                        velA.velocity += impulse * collisionNormal * deltaTime;
+                                        velB.velocity -= impulse * collisionNormal * deltaTime;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 
 GameManager::GameManager() : luaState(nullptr) {}
@@ -185,10 +329,8 @@ void GameManager::init() {
     luaL_openlibs(luaState);
 
     // Entity creation  ----------------------------------------------------------------------------------------------------------------------------------------
-    entityFactory = std::make_shared<EntityFactory>(
-        entityManager, transformManager, renderManager, 
-        velocityManager, inputManagerComponent, colliderManager, 
-        triangleSurfaceManager, pointCloudManager, heightMapManager, 
+    entityFactory = std::make_shared<EntityFactory>(entityManager, transformManager, renderManager, velocityManager, 
+        inputManagerComponent, colliderManager, triangleSurfaceManager, pointCloudManager, heightMapManager, 
         renderHandler, particleManager);
     
     int player = entityFactory->createPlayer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f));
@@ -238,7 +380,7 @@ void GameManager::update() {
     inputSystem->update(window, deltaTime);
     physicsSystem->update(deltaTime);
 
-    detectAndResolveCollisions(entityManager, transformManager, colliderManager, velocityManager, deltaTime*100);
+    detectAndResolveCollisionsWithQuadtree(entityManager, transformManager, colliderManager, velocityManager, deltaTime * 100);
 
     for (int entity : entityManager.getEntities()) {
         if (transformManager.hasComponent(entity)) {
