@@ -4,10 +4,10 @@ int EntityFactory::createPlayer(const glm::vec3& position, const glm::vec3& scal
     int player = entityManager.createEntity();
     //renderManager.addComponent(player, RenderComponent(std::make_shared<Model>("models/cube2.obj")));
 
-    /*auto sphereModel = std::make_shared<Model>();
+    auto sphereModel = std::make_shared<Model>();
     sphereModel->createSphere(0.5f, 36, 18);
     renderManager.addComponent(player, RenderComponent(sphereModel));
-    colliderManager.addComponent(player, ColliderComponent(ColliderType::SPHERE, position, glm::vec3(1.0f)));*/
+    colliderManager.addComponent(player, ColliderComponent(ColliderType::SPHERE, position, glm::vec3(1.0f)));
 
     transformManager.addComponent(player, TransformComponent(position, glm::vec3(1.0f), scale));
     velocityManager.addComponent(player, VelocityComponent(velocity, 1.0f));

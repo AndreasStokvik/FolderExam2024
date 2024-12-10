@@ -41,7 +41,7 @@ void InputManager::processInput(const std::shared_ptr <Window>& window, const st
     if (isKeyPressed(window, GLFW_KEY_LEFT_SHIFT))
         camera->processKeyboard(DOWN, deltaTime);
 
-    if (isKeyPressed(window, GLFW_KEY_E))
+    if (isKeyPressedOnce(window, GLFW_KEY_E))
         entityFactory->createSphere(camera->getPosition(), 0.5f, glm::vec3(1.0f));
 
     // Toggle cursor and camera movement with Escape key

@@ -32,11 +32,16 @@ void PhysicsSystem::update(float deltaTime)
                     totalForce += glm::vec3(gravityOnSurface.x, 0.0f, gravityOnSurface.z);
 
                     // Adjust the ball's vertical position to stay on the surface
-                    float surfaceHeight = heightMapManager->getHeightAt(
-                        transformComp.position.x,
-                        transformComp.position.y,
-                        transformComp.position.z);
-                    transformComp.position.y = surfaceHeight + transformComp.scale.y / 2;
+                    if (heightMapManager) {
+                        float surfaceHeight = heightMapManager->getHeightAt(
+                            transformComp.position.x,
+                            transformComp.position.y,
+                            transformComp.position.z);
+                        transformComp.position.y = surfaceHeight + transformComp.scale.y / 2;
+                    }
+                    else {
+                        transformComp.position.y = transformComp.scale.y / 2;
+                    }
 
                     // Apply Newton's second law: F = ma -> a = F / m
                     glm::vec3 acceleration = totalForce / velocityComp.mass;
@@ -72,5 +77,10 @@ void PhysicsSystem::update(float deltaTime)
 
 
 glm::vec3 PhysicsSystem::getSurfaceNormal(const glm::vec3& position, const glm::vec3& scale) {
-    return heightMapManager->getClosestNormal(position.x, position.z, scale);
+    if (heightMapManager) {
+        return heightMapManager->getClosestNormal(position.x, position.z, scale);
+    }
+    else {
+        return glm::vec3(0.0f, 1.0f, 0.0f);
+    }
 }

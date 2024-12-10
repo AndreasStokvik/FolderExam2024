@@ -78,7 +78,6 @@ void bindParticleComponentToLua(lua_State* L, ComponentManager<ParticleComponent
         << ", Updated Max Count: " << newMaxCount
         << ", Updated Gravity: " << newGravity << std::endl;
 }
-
 void printLuaStack(lua_State* L) {
     int top = lua_gettop(L);
     std::cout << "Lua Stack (top=" << top << "):" << std::endl;
@@ -100,13 +99,86 @@ void printLuaStack(lua_State* L) {
     }
 }
 
+bool checkSphereCollision(
+    const TransformComponent& transformA, const ColliderComponent& colliderA,
+    const TransformComponent& transformB, const ColliderComponent& colliderB)
+{
+    if (colliderA.type == ColliderType::SPHERE && colliderB.type == ColliderType::SPHERE) {
+        glm::vec3 posA = transformA.position;
+        glm::vec3 posB = transformB.position;
+
+        float radiusA = colliderA.dimensions.x / 2.0f;
+        float radiusB = colliderB.dimensions.x / 2.0f;
+
+        float deltaX = posA.x - posB.x;
+        float deltaZ = posA.z - posB.z;
+        float distanceSquared = (deltaX * deltaX) + (deltaZ * deltaZ);
+        float radiusSum = radiusA + radiusB;
+
+        return distanceSquared <= radiusSum * radiusSum;
+    }
+    return false;
+}
+
+void detectAndResolveCollisions(EntityManager& entityManager,
+    ComponentManager<TransformComponent>& transformManager,
+    ComponentManager<ColliderComponent>& colliderManager,
+    ComponentManager<VelocityComponent>& velocityManager,
+    float deltaTime)
+{
+    const auto& entities = entityManager.getEntities();
+
+    for (auto itA = entities.begin(); itA != entities.end(); ++itA) {
+        auto itB = itA;
+        ++itB;
+        for (; itB != entities.end(); ++itB) {
+            int entityA = *itA;
+            int entityB = *itB;
+
+            if (transformManager.hasComponent(entityA) && colliderManager.hasComponent(entityA) &&
+                transformManager.hasComponent(entityB) && colliderManager.hasComponent(entityB))
+            {
+                TransformComponent& transformA = transformManager.getComponent(entityA);
+                ColliderComponent& colliderA = colliderManager.getComponent(entityA);
+
+                TransformComponent& transformB = transformManager.getComponent(entityB);
+                ColliderComponent& colliderB = colliderManager.getComponent(entityB);
+
+                if (checkSphereCollision(transformA, colliderA, transformB, colliderB)) {
+                    std::cout << "Collision detected between entities " << entityA << " and " << entityB << std::endl;
+
+                    if (!colliderA.isStatic && !colliderB.isStatic) {
+                        if (velocityManager.hasComponent(entityA) && velocityManager.hasComponent(entityB)) {
+                            VelocityComponent& velA = velocityManager.getComponent(entityA);
+                            VelocityComponent& velB = velocityManager.getComponent(entityB);
+
+                            glm::vec3 collisionNormal = glm::normalize(transformB.position - transformA.position);
+                            float relativeVelocity = glm::dot(velB.velocity - velA.velocity, collisionNormal);
+
+                            if (relativeVelocity < 0) {
+                                float restitution = 1.0f; // Elasticity factor
+                                float impulse = (1 + restitution) * relativeVelocity / 2.0f;
+
+                                velA.velocity += impulse * collisionNormal * deltaTime;
+                                velB.velocity -= impulse * collisionNormal * deltaTime;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
 GameManager::GameManager() : luaState(nullptr) {}
 
 void GameManager::init() {
     camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
     window = std::make_shared<Window>(1280, 720, "OpenGL Window", camera);
     inputManager = std::make_shared<InputManager>(window, camera, inputManagerComponent, entityManager, transformManager, *this);
-    inputSystem = std::make_shared<InputSystem>(256.0f, entityManager, inputManagerComponent, velocityManager, inputManager, transformManager);
+    inputSystem = std::make_shared<InputSystem>(8, entityManager, inputManagerComponent, velocityManager, inputManager, transformManager);
     renderHandler = std::make_shared<RenderHandler>();
 
     luaState = luaL_newstate();
@@ -165,6 +237,8 @@ void GameManager::update() {
 
     inputSystem->update(window, deltaTime);
     physicsSystem->update(deltaTime);
+
+    detectAndResolveCollisions(entityManager, transformManager, colliderManager, velocityManager, deltaTime*100);
 
     for (int entity : entityManager.getEntities()) {
         if (transformManager.hasComponent(entity)) {
